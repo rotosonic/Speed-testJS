@@ -33,7 +33,7 @@
   var option;
   var startTestButton;
   var firstRun = true;
-  var uploadSize;
+  var uploadSize = 100000;
 
   function initTest() {
     function addEvent(el, ev, fn) {
@@ -143,6 +143,7 @@
       if (xhr.readyState == XMLHttpRequest.DONE) {
         var data = JSON.parse(xhr.responseText);
         testPlan = data;
+        testPlan.baseUrlIPv4='69.252.86.194';
         if (testPlan.performLatencyRouting) {
           latencyBasedRouting();
         }
@@ -346,7 +347,7 @@
     var baseUrl = (version === 'IPv6') ? 'http://' + testPlan.baseUrlIPv6 : 'http://' + testPlan.baseUrlIPv4;
 
     var uploadHttpConcurrentTestSuite = new window.newuploadHttpConcurrentProgress(baseUrl + '/upload', 'POST', 6, 15000, 15000, uploadHttpOnComplete, uploadHttpOnProgress,
-      uploadHttpOnError, uploadSize*4);
+      uploadHttpOnError, uploadSize*6);
     uploadHttpConcurrentTestSuite.initiateTest();
 
   }

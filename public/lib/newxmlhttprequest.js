@@ -223,6 +223,7 @@
    */
   newxmlHttpRequest.prototype._handleOnProgressUpload = function (response) {
     //measure bandwidth after one progress event due to rampup
+    console.log(this.progressCount);
     if (this.progressCount > 1 && response.lengthComputable) {
       var result = {};
       result.id = this.id;

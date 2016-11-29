@@ -44,7 +44,7 @@
     this.clientCallbackProgress = callbackProgress;
     this.clientCallbackError = callbackError;
 
-    this.movingAverage = 10;
+    this.movingAverage = 2;
     //unique id or test
     this._testIndex = 0;
     //array holding all results
@@ -181,7 +181,7 @@
    * onProgress method
    */
   newuploadHttpConcurrentProgress.prototype.onTestProgress = function (result) { // jshint ignore:line
-
+console.log(result.bandwidth);
     if (!this._running) {
       return;
     }
@@ -194,12 +194,12 @@
     this.testResults.push(result.bandwidth);
     //populate array
     this._progressResults['arrayProgressResults' + result.id].push(result.bandwidth);
-    if(this._progressCount>20) {
+
       //calculate moving average
       if (this._progressCount % this.movingAverage === 0) {
         this.calculateStats();
       }
-    }
+
   };
 
   /**
@@ -239,7 +239,8 @@
           testRun: this._testIndex
         });
         if(this._payload===null){
-          this._payload = new Blob([getRandomData(this.uploadSize)], {type: 'text/plain'});
+          //this._payload = new Blob([getRandomData(this.uploadSize)], {type: 'text/plain'});
+          this._payload = getRandomString(this.uploadSize);
         }
         request.start(this.uploadSize, this._testIndex,this._payload);
       }
@@ -269,6 +270,15 @@
   };
 
 
+  function getRandomString (size) {
+    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789~!@#$%^&*()_+`-=[]\{}|;:,./<>?', //random data prevents gzip effect
+      result = '';
+    for (var index = 0; index < size; index++) {
+      var randomChars = Math.floor(Math.random() * chars.length);
+      result += chars.charAt(randomChars);
+    }
+    return result;
+  }
 
   /**
    * Cancel the test
@@ -293,6 +303,11 @@
     this._progressResults = {};
     this._progressCount = 0;
     this._running = true;
+    this._progressCount = 0;
+    this.testResults = [];
+    this._collectMovingAverages = false;
+    //this payload to send for uploads
+    this._payload=null;
     this._beginTime = Date.now();
     this.start();
   };
