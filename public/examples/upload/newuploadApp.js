@@ -346,7 +346,7 @@
     var baseUrl = (version === 'IPv6') ? 'http://' + testPlan.baseUrlIPv6 : 'http://' + testPlan.baseUrlIPv4;
 
     var uploadHttpConcurrentTestSuite = new window.newuploadHttpConcurrentProgress(baseUrl + '/upload', 'POST', 6, 15000, 15000, uploadHttpOnComplete, uploadHttpOnProgress,
-      uploadHttpOnError, uploadSize*2);
+      uploadHttpOnError, uploadSize*4);
     uploadHttpConcurrentTestSuite.initiateTest();
 
   }
