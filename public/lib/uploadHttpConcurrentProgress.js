@@ -185,22 +185,25 @@
         this.testResults.push(result.bandwidth);
         //populate array
         this._progressResults['arrayProgressResults' + result.id].push(result.bandwidth);
+
+      if(this._progressCount>20) {
         //calculate moving average
         if (this._progressCount % this.movingAverage === 0) {
-            var example = this.testResults.splice(0, 11);
+          var example = this.testResults.splice(0, 11);
 
-            var singleMovingAverage = 0;
-            for (var i = 0; i < this.movingAverage; i++) {
-                singleMovingAverage += example[i];
-            }
+          var singleMovingAverage = 0;
+          for (var i = 0; i < this.movingAverage; i++) {
+            singleMovingAverage += example[i];
+          }
 
-            if (isFinite(singleMovingAverage)) {
-                var totalMovingAverage = singleMovingAverage/this.movingAverage;
-                this.clientCallbackProgress(totalMovingAverage);
-                this._finalResults.push(totalMovingAverage);
-            }
+          if (isFinite(singleMovingAverage)) {
+            var totalMovingAverage = singleMovingAverage / this.movingAverage;
+            this.clientCallbackProgress(totalMovingAverage);
+            this._finalResults.push(totalMovingAverage);
+          }
 
         }
+      }
     };
 
     /**
