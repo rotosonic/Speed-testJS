@@ -156,6 +156,7 @@
             if (xhr.readyState == XMLHttpRequest.DONE) {
                 var data = JSON.parse(xhr.responseText);
                 testPlan = data;
+              //testPlan.baseUrlIPv4 = '127.0.0.1';
                 if (testPlan.performLatencyRouting) {
                     latencyBasedRouting();
                 }
@@ -282,6 +283,7 @@
         }
 
         function latencyHttpOnError(result) {
+console.log('latencyHttpOnError');
             if (version === 'IPv6') {
                 testPlan.hasIPv6 = false;
                 latencyTest('IPv4');
@@ -335,7 +337,7 @@
             //use default value for download testing
             void (!(testPlan.hasIPv6 === 'IPv6') && setTimeout(function () { downloadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'); }, 500));
         }
-        var downloadProbeTestRun = new window.downloadProbeTest('http://' + testPlan.baseUrlIPv4 + '/download?bufferSize='+downloadSize, 'http://' + testPlan.baseUrlIPv4 + '/downloadProbe', false, 3000,762939,downloadProbeTestOnComplete,
+        var downloadProbeTestRun = new window.downloadProbeTest('http://' + testPlan.baseUrlIPv4 + '/download', 'http://' + testPlan.baseUrlIPv4 + '/downloadProbe', false, 3000,762939,downloadProbeTestOnComplete,
             downloadProbeTestOnError);
         downloadProbeTestRun.start();
 

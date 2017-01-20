@@ -106,8 +106,20 @@
       xhr.onreadystatechange = function() {
           if (xhr.readyState === XMLHttpRequest.DONE) {
             self._running=false;
-            var data = JSON.parse(xhr.responseText);
-            self.clientCallbackComplete(data);
+            try {
+              console.log(xhr.responseText);
+              console.log(JSON.parse(xhr.responseText));
+              var data = JSON.parse('j{dfdkk}');
+              self.clientCallbackComplete(data);
+            }
+            catch(error){
+              console.dir(result);
+              console.log((1/10)*100);
+              var percentLoaded = (result.time/15000)*100;
+              var estimatedLoadedFor15Seconds = (100 -percentLoaded) * self.size;
+              console.log(Math.round(estimatedLoadedFor15Seconds));
+              //console.log(result.time + ' ' +self.size);
+            }
           }
       };
       var requestTimeout;
