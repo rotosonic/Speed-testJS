@@ -101,7 +101,15 @@
    */
    downloadProbeTest.prototype.onTestComplete = function (result) {
       clearInterval(this.interval);
+
       var self =this;
+     console.dir(result);
+     console.log((1/10)*100);
+     var percentLoaded = (result.time/15000)*100;
+     var estimatedLoadedFor15Seconds = (100 -percentLoaded) * self.size;
+     self.clientCallbackComplete([Math.round(estimatedLoadedFor15Seconds)]);
+
+      /*
       var xhr = new XMLHttpRequest();
       xhr.onreadystatechange = function() {
           if (xhr.readyState === XMLHttpRequest.DONE) {
@@ -130,6 +138,7 @@
       };
        xhr.open('GET', this.dataUrl+ '?bufferSize=' + this.size + '&time='+result.time+'&sendBinary=false&lowLatency=' + this.lowLatency+'&r=' + Math.random(), true);
        xhr.send(null);
+       */
    };
 
    /**

@@ -127,14 +127,19 @@
         this._collectMovingAverages = false;
         //pushing results to an array
         this._results.push(result);
+        //calculate stats
+        this.calculateStats();
+
         //cancel remaining tests
-        for (var i = 0; i < this._activeTests.length; i++) {
+      /*
+      for (var i = 0; i < this._activeTests.length; i++) {
             if (typeof(this._activeTests[i]) !== 'undefined') {
                 this._activeTests[i].xhr._request.abort();
             }
         }
+        */
         //reset Active Tests array
-        this._activeTests.length =0;
+        //this._activeTests.length =0;
         //checking if we can continue with the test
         if ((Date.now() - this._beginTime) < this.testLength) {
             this.start();
