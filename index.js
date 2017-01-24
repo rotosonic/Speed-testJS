@@ -88,7 +88,27 @@ module.exports.TestServerController = require('./controllers/TestServerControlle
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.listen(webPort, '::');
-
+app.listen(5010);
+app.listen(5011);
+app.listen(5012);
+app.listen(5013);
+app.listen(5014);
+app.listen(5015);
+app.listen(5016);
+app.listen(5017);
+app.listen(5018);
+app.listen(5019);
+app.listen(5020);
+app.listen(5021);
+app.listen(5022);
+app.listen(5023);
+app.listen(5024);
+app.listen(5025);
+app.listen(5026);
+app.listen(5027);
+app.listen(5028);
+app.listen(5029);
+app.listen(5030);
 var wss = new WebSocketServer({port: webSocketPort});
 wss.on('connection', function connection(ws) {
     console.log('client connected');

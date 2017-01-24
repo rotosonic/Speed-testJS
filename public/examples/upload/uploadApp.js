@@ -39,11 +39,12 @@
     var uploadTestLength = 20000;
     var uploadMovingAverage = 1;
     var defaultUploadSize = 25526506;
-    var uiMovingAverage = 10;
+    var uiMovingAverage = 4;
     var microsoftUploadSize = 17526506;
     var microsoftUiUploadMovingAverage = 2;
     var testServerTimeout = 2000;
-
+    var ports = [5010, 5011, 5012, 5013, 5014, 5015, 5016, 5017, 5018, 5019, 5020,5021,5022,5023,5024,5025,5026,5027,5028,5029,5030];
+    var urls = [];
     function initTest() {
         function addEvent(el, ev, fn) {
             void (el.addEventListener && el.addEventListener(ev, fn, false));
@@ -360,8 +361,13 @@
             uploadSize = microsoftUploadSize;
             uiMovingAverage = microsoftUiUploadMovingAverage;
         }
-
-        var uploadHttpConcurrentTestSuite = new window.uploadHttpConcurrentProgress(baseUrl + '/upload', 'POST', uploadConcurrentRuns, uploadTimeout, uploadTestLength,
+        for(var i=0;i<ports.length-1;i++){
+            urls.push('http://' + testPlan.baseUrlIPv4.split(':')[0]+':' +ports[i]+ '/upload');
+            console.log('http://' + testPlan.baseUrlIPv4.split(':')[0]+':' +ports[i]+ '/upload');
+            console.log(baseUrl + '/upload');
+            //urls.push(baseUrl.split(':')[0]+':' +ports[i]+ '/download?bufferSize='+downloadSize/20);
+        }
+        var uploadHttpConcurrentTestSuite = new window.uploadHttpConcurrentProgress(urls,baseUrl + '/upload', 'POST', 20, uploadTimeout, uploadTestLength,
             uploadMovingAverage, uiMovingAverage, uploadHttpOnComplete, uploadHttpOnProgress, uploadHttpOnError, uploadSize);
         uploadHttpConcurrentTestSuite.initiateTest();
 

@@ -107,7 +107,7 @@
      console.log((1/10)*100);
      var percentLoaded = (result.time/15000)*100;
      var estimatedLoadedFor15Seconds = (100 -percentLoaded) * self.size;
-     self.clientCallbackComplete([Math.round(estimatedLoadedFor15Seconds)]);
+     self.clientCallbackComplete([Math.round(estimatedLoadedFor15Seconds)/4]);
 
       /*
       var xhr = new XMLHttpRequest();

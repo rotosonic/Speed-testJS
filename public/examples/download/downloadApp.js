@@ -34,6 +34,8 @@
     var startTestButton;
     var firstRun = true;
     var downloadSize = 1000000;
+  var ports = [5010, 5011, 5012, 5013, 5014, 5015, 5016, 5017, 5018, 5019, 5020,5021,5022,5023,5024,5025,5026,5027,5028,5029,5030];
+  var urls = [];
     function initTest() {
         function addEvent(el, ev, fn) {
             void (el.addEventListener && el.addEventListener(ev, fn, false));
@@ -337,8 +339,13 @@
         }
 
         var baseUrl = (version === 'IPv6') ? 'http://' + testPlan.baseUrlIPv6 : 'http://' + testPlan.baseUrlIPv4;
-
-        var downloadHttpConcurrentProgress = new window.downloadHttpConcurrentProgress(baseUrl + '/download?bufferSize='+downloadSize, 'GET', 6, 15000, 15000,10, downloadHttpOnComplete, downloadHttpOnProgress,
+      for(var i=0;i<ports.length-1;i++){
+        urls.push('http://' + testPlan.baseUrlIPv4.split(':')[0]+':' +ports[i]+ '/download?bufferSize='+downloadSize);
+        console.log();
+        //urls.push(baseUrl.split(':')[0]+':' +ports[i]+ '/download?bufferSize='+downloadSize/20);
+      }
+      console.log(urls[0]);
+        var downloadHttpConcurrentProgress = new window.downloadHttpConcurrentProgress(urls,baseUrl + '/download?bufferSize='+downloadSize, 'GET', 20, 15000, 15000,5, downloadHttpOnComplete, downloadHttpOnProgress,
             downloadHttpOnAbort, downloadHttpOnTimeout, downloadHttpOnError);
         downloadHttpConcurrentProgress.initiateTest();
     }

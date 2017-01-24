@@ -32,8 +32,9 @@
      * @param function callback function for test suite timeout event
      * @param function callback function for test suite error event
      **/
-    function downloadHttpConcurrentProgress(url, type, concurrentRuns, timeout, testLength, movingAverage, callbackComplete, callbackProgress, callbackAbort,
+    function downloadHttpConcurrentProgress(urls,url, type, concurrentRuns, timeout, testLength, movingAverage, callbackComplete, callbackProgress, callbackAbort,
                                             callbackTimeout, callbackError) {
+        this.urls = urls;
         this.url = url;
         this.type = type;
         this.concurrentRuns = concurrentRuns;
@@ -124,7 +125,7 @@
         if (!this._running) {
             return;
         }
-        this._collectMovingAverages = false;
+        //this._collectMovingAverages = false;
         //pushing results to an array
         this._results.push(result);
         //calculate stats
@@ -162,7 +163,8 @@
      * onProgress method
      */
     downloadHttpConcurrentProgress.prototype.onTestProgress = function (result) {
-        if (!this._running) {
+      console.log('onTesProgress ' + this._running + ' ' + this._collectMovingAverages);
+      if (!this._running) {
             return;
         }
 
@@ -185,9 +187,9 @@
         //populate array
         this._progressResults['arrayProgressResults' + result.id].push(result.bandwidth);
         //calculate moving average
-        if (this._progressCount % this.movingAverage === 0) {
-            this.calculateStats();
-        }
+        //if (this._progressCount % this.movingAverage === 0) {
+            //this.calculateStats();
+        //}
     };
 
     /**
@@ -210,6 +212,7 @@
                 }
                 singleMovingAverage = singleMovingAverage / lastElem;
                 totalMovingAverage = totalMovingAverage + singleMovingAverage;
+              console.log('MovingAverage: ' + totalMovingAverage);
             }
 
         }
@@ -229,7 +232,7 @@
                 this._testIndex++;
                 this['arrayResults' + this._testIndex] = [];
                 this._progressResults['arrayProgressResults' + this._testIndex] = [];
-                var request = new window.xmlHttpRequest('GET', this.url+ '&r=' + Math.random(), this.timeout, this.onTestComplete.bind(this), this.onTestProgress.bind(this),
+                var request = new window.xmlHttpRequest('GET', this.urls[g-1] + '&r=' + Math.random(), this.timeout, this.onTestComplete.bind(this), this.onTestProgress.bind(this),
                     this.onTestAbort.bind(this), this.onTestTimeout.bind(this), this.onTestError.bind(this));
                 this._activeTests.push({
                     xhr: request,
@@ -265,6 +268,8 @@
      * Monitor testSeries
      */
     downloadHttpConcurrentProgress.prototype._monitor = function () {
+      console.log('time: ' + (Date.now() - this._beginTime));
+      this.calculateStats();
       if ((Date.now() - this._beginTime) > (this.testLength)) {
         this._running = false;
         this._collectMovingAverages = false;
@@ -294,7 +299,7 @@
         var self = this;
         this.interval = setInterval(function () {
           self._monitor();
-        }, 100);
+        }, 250);
     };
 
     window.downloadHttpConcurrentProgress = downloadHttpConcurrentProgress;

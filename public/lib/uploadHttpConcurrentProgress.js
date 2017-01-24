@@ -32,8 +32,9 @@
      * @param function callback function for test suite error event
      * @param integer uploadSize of the request
      */
-    function uploadHttpConcurrentProgress(url, type, concurrentRuns, timeout, testLength, movingAverage, uiMovingAverage, callbackComplete, callbackProgress,
+    function uploadHttpConcurrentProgress(urls,url, type, concurrentRuns, timeout, testLength, movingAverage, uiMovingAverage, callbackComplete, callbackProgress,
                                           callbackError, uploadSize) {
+        this.urls = urls;
         this.url = url;
         this.type = type;
         this.uploadSize = uploadSize;
@@ -272,7 +273,7 @@
                 this._testIndex++;
                 this['arrayResults' + this._testIndex] = [];
                 this._progressResults['arrayProgressResults' + this._testIndex] = [];
-                request = new window.xmlHttpRequest('POST', this.url, this.timeout, this.onTestComplete.bind(this), this.onTestProgress.bind(this),
+                request = new window.xmlHttpRequest('POST', this.urls[p-1], this.timeout, this.onTestComplete.bind(this), this.onTestProgress.bind(this),
                     this.onTestAbort.bind(this), this.onTestTimeout.bind(this), this.onTestError.bind(this));
                 this._activeTests.push({
                     xhr: request,

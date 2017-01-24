@@ -205,13 +205,15 @@
           result.id = this.id;
           this.currentTime = Date.now();
           result.totalTime = this.currentTime - this.prevTime;
-          var transferSizeMbs = ((response.loaded - this.prevLoad) * 8) / 1000000;
-          var transferDurationSeconds = result.totalTime/1000;
-          result.bandwidth = transferSizeMbs/transferDurationSeconds;
-          if(isFinite(result.bandwidth)){
-            this.callbackProgress(result);
-            this.prevTime = this.currentTime;
-            this.prevLoad = response.loaded;
+          if (result.totalTime > this.progressInterval) {
+            var transferSizeMbs = ((response.loaded - this.prevLoad) * 8) / 1000000;
+            var transferDurationSeconds = result.totalTime / 1000;
+            result.bandwidth = transferSizeMbs / transferDurationSeconds;
+            if (isFinite(result.bandwidth)) {
+              this.callbackProgress(result);
+              this.prevTime = this.currentTime;
+              this.prevLoad = response.loaded;
+            }
           }
         }
       //increment onProgressEvent
