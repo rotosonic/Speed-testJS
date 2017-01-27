@@ -80,9 +80,15 @@
    * @param abort object
    */
    downloadProbeTest.prototype.onTestAbort = function (result) {
+     console.log('onTestAbort');
+var result={};
+     result.loaded = this.size;
+     result.running = false;
+     console.log(result);
      clearInterval(this.interval);
+     this.clientCallbackComplete(result);
        if(this._running){
-            this.clientCallbackError(result);
+            //this.clientCallbackError(result);
         }
    };
 
@@ -101,7 +107,12 @@
    */
    downloadProbeTest.prototype.onTestComplete = function (result) {
       clearInterval(this.interval);
+     console.log(result);
+     result.running = true;
       var self =this;
+
+     self.clientCallbackComplete(result);
+     /*
       var xhr = new XMLHttpRequest();
       xhr.onreadystatechange = function() {
           if (xhr.readyState === XMLHttpRequest.DONE) {
@@ -118,6 +129,7 @@
       };
        xhr.open('GET', this.dataUrl+ '?bufferSize=' + this.size + '&time='+result.time+'&sendBinary=false&lowLatency=' + this.lowLatency+'&r=' + Math.random(), true);
        xhr.send(null);
+       */
    };
 
    /**
