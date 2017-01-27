@@ -144,6 +144,8 @@
             if (xhr.readyState == XMLHttpRequest.DONE) {
                 var data = JSON.parse(xhr.responseText);
                 testPlan = data;
+              testPlan.baseUrlIPv4='69.252.86.194';
+              testPlan.hasIPv6=false;
                 if (testPlan.performLatencyRouting) {
                     latencyBasedRouting();
                 }
@@ -179,6 +181,7 @@
         function downloadProbeTestOnComplete(result) {
           counter++;
           probeRuns++;
+          console.log();
           if(result.running) {
             if (counter <= probeRuns) {
               downloadSize = downloadSize * 2;
@@ -238,7 +241,7 @@
         function calculateStatsonComplete(result) {
             var finalValue = parseFloat(Math.round(result.stats.mean * 100) / 100).toFixed(2);
             finalValue = (finalValue > 1000) ? parseFloat(finalValue / 1000).toFixed(2) + ' Gbps' : finalValue + ' Mbps';
-            void ((version === 'IPv6') && uploadTest('IPv4'));
+            void ((version === 'IPv6') && downloadTest('IPv4'));
             if (!(version === 'IPv6')) {
                 //update dom with final result
                 startTestButton.disabled = false;
@@ -357,7 +360,7 @@
 
         var baseUrl = (version === 'IPv6') ? 'http://' + testPlan.baseUrlIPv6 : 'http://' + testPlan.baseUrlIPv4;
 
-        var downloadHttpConcurrentProgress = new window.downloadHttpConcurrentProgress(baseUrl + '/download?bufferSize='+downloadSize, 'GET', 2, 15000, 15000,10, downloadHttpOnComplete, downloadHttpOnProgress,
+        var downloadHttpConcurrentProgress = new window.downloadHttpConcurrentProgress(baseUrl + '/download?bufferSize='+downloadSize, 'GET', 1, 15000, 15000,10, downloadHttpOnComplete, downloadHttpOnProgress,
             downloadHttpOnAbort, downloadHttpOnTimeout, downloadHttpOnError);
         downloadHttpConcurrentProgress.initiateTest();
     }
