@@ -179,9 +179,17 @@
     function downloadProbe() {
 
         function downloadProbeTestOnComplete(result) {
+          var currentTest = 'download';
+          option.series[0].data[0].value = 0;
+          option.series[0].data[0].name = 'Testing Download ...';
+          option.series[0].detail.formatter = formatSpeed;
+          option.series[0].detail.show = true;
+          myChart.setOption(option, true);
           counter++;
           probeRuns++;
-          console.log();
+
+          option.series[0].data[0].value = result.bandwidth;
+          myChart.setOption(option, true);
           if(result.running) {
             if (counter <= probeRuns) {
               downloadSize = downloadSize * 2;
@@ -231,12 +239,7 @@
     }
 
     function downloadTest(version) {
-        var currentTest = 'download';
-        option.series[0].data[0].value = 0;
-        option.series[0].data[0].name = 'Testing Download ...';
-        option.series[0].detail.formatter = formatSpeed;
-        option.series[0].detail.show = true;
-        myChart.setOption(option, true);
+       
 
         function calculateStatsonComplete(result) {
             var finalValue = parseFloat(Math.round(result.stats.mean * 100) / 100).toFixed(2);
@@ -360,7 +363,7 @@
 
         var baseUrl = (version === 'IPv6') ? 'http://' + testPlan.baseUrlIPv6 : 'http://' + testPlan.baseUrlIPv4;
 
-        var downloadHttpConcurrentProgress = new window.downloadHttpConcurrentProgress(baseUrl + '/download?bufferSize='+downloadSize, 'GET', 1, 15000, 15000,10, downloadHttpOnComplete, downloadHttpOnProgress,
+        var downloadHttpConcurrentProgress = new window.downloadHttpConcurrentProgress(baseUrl + '/download?bufferSize='+downloadSize, 'GET', 3, 15000, 15000,10, downloadHttpOnComplete, downloadHttpOnProgress,
             downloadHttpOnAbort, downloadHttpOnTimeout, downloadHttpOnError);
         downloadHttpConcurrentProgress.initiateTest();
     }

@@ -84,7 +84,7 @@
 var result={};
      result.loaded = this.size;
      result.running = false;
-     console.log(result);
+
      clearInterval(this.interval);
      this.clientCallbackComplete(result);
        if(this._running){
@@ -107,7 +107,7 @@ var result={};
    */
    downloadProbeTest.prototype.onTestComplete = function (result) {
       clearInterval(this.interval);
-     console.log(result);
+
      result.running = true;
       var self =this;
 
