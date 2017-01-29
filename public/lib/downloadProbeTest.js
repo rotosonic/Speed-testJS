@@ -27,7 +27,7 @@
    * @param function callback function for test suite complete event
    * @param function callback function for test suite error event
    **/
-   function downloadProbeTest(url, dataUrl,lowLatency, timeout,size, callbackComplete,callbackError) {
+   function downloadProbeTest(url, dataUrl,lowLatency, timeout,size, callbackComplete,callbackError,callbackProgress) {
      this.dataUrl = dataUrl;
      this.probeTestUrl = url+ '?bufferSize=' + size + '&time=0&sendBinary=true&lowLatency=' + lowLatency;
      this.lowLatency = lowLatency;
@@ -41,6 +41,7 @@
      this._running = true;
      this.clientCallbackComplete = callbackComplete;
      this.clientCallbackError = callbackError;
+     this.clientCallbackProgress = callbackProgress;
      //probe timeout call
      this.probeTimeout = 1000;
      //monitor interval
@@ -80,11 +81,9 @@
    * @param abort object
    */
    downloadProbeTest.prototype.onTestAbort = function (result) {
-     console.log('onTestAbort');
-var result={};
-     result.loaded = this.size;
      result.running = false;
-
+     console.log('testAbort');
+     console.log(result);
      clearInterval(this.interval);
      this.clientCallbackComplete(result);
        if(this._running){
@@ -137,7 +136,12 @@ var result={};
    * @param  result
    */
    downloadProbeTest.prototype.onTestProgress = function(result){ // jshint ignore:line
-        //process result if you want to use this function
+     //console.log(result.bandwidth);
+     //this.size = this.size + result;
+     result.running = true;
+     this.clientCallbackProgress(result);
+     //{id: 1, totalTime: 132, bandwidth: 7.954121212121212, loaded: 131243}
+
    };
 
    /**

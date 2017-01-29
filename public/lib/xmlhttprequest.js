@@ -128,12 +128,13 @@
       */
      xmlHttpRequest.prototype._handleAbort = function(response) {
        clearTimeout(this.requestTimeout);
-       this.totalTime = this.endTime - this.startTime;
+       this.totalTime = Date.now() - this.startTime;
        var transferSizeMbs = (response.loaded * 8) / 1000000;
        var transferDurationSeconds = this.totalTime/1000;
        //package results
        var result = {};
        result.latency = this.totalTime;
+       result.loaded = response.loaded;
        result.bandwidth = transferSizeMbs/transferDurationSeconds;
        result.id = this.id;
        this.callbackAbort(result);

@@ -191,10 +191,9 @@
           option.series[0].data[0].value = result.bandwidth;
           myChart.setOption(option, true);
           if(result.running) {
-            if (counter <= probeRuns) {
+
               downloadSize = downloadSize * 2;
               downloadProbe();
-            }
           }
           else{
             downloadSize = result.loaded;
@@ -213,12 +212,17 @@
            // void (!(testPlan.hasIPv6 === 'IPv6') && setTimeout(function () { !firstRun && downloadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'); }, 500));
         }
 
+      function downloadProbeTestOnProgress(result) {
+        option.series[0].data[0].value = result.bandwidth;
+        myChart.setOption(option, true);
+      }
+
         function downloadProbeTestOnError(result) {
             //use default value for download testing
             //void (!(testPlan.hasIPv6 === 'IPv6') && setTimeout(function () { downloadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'); }, 500));
         }
         var downloadProbeTestRun = new window.downloadProbeTest('http://' + testPlan.baseUrlIPv4 +'/download?bufferSize='+downloadSize, 'http://' + testPlan.baseUrlIPv4 + '/downloadProbe', false, 3000,downloadSize,downloadProbeTestOnComplete,
-            downloadProbeTestOnError);
+            downloadProbeTestOnError,downloadProbeTestOnProgress);
         downloadProbeTestRun.start();
 
     }
