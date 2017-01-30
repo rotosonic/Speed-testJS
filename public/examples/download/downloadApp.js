@@ -36,6 +36,7 @@
     var downloadSize = 10000;
   var probeRuns = 20;
   var counter = 0;
+  var currentTest;
     function initTest() {
         function addEvent(el, ev, fn) {
             void (el.addEventListener && el.addEventListener(ev, fn, false));
@@ -144,8 +145,6 @@
             if (xhr.readyState == XMLHttpRequest.DONE) {
                 var data = JSON.parse(xhr.responseText);
                 testPlan = data;
-              testPlan.baseUrlIPv4='69.252.86.194';
-              testPlan.hasIPv6=false;
                 if (testPlan.performLatencyRouting) {
                     latencyBasedRouting();
                 }
@@ -179,7 +178,7 @@
     function downloadProbe() {
 
         function downloadProbeTestOnComplete(result) {
-          var currentTest = 'download';
+          currentTest = 'download';
           option.series[0].data[0].value = 0;
           option.series[0].data[0].name = 'Testing Download ...';
           option.series[0].detail.formatter = formatSpeed;
@@ -199,18 +198,7 @@
             downloadSize = result.loaded;
             void (!(testPlan.hasIPv6 === 'IPv6') && setTimeout(function () { !firstRun && downloadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'); }, 500));
           }
-          /*
-          var downloadSizes = result;
-            if(downloadSizes.length>0) {
-                //downloadSize = downloadSizes[downloadSizes.length-1];
-                //downloadSize = downloadSizes[0];
-
-
-            }
-            */
-            //call downloadTests
-           // void (!(testPlan.hasIPv6 === 'IPv6') && setTimeout(function () { !firstRun && downloadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'); }, 500));
-        }
+         }
 
       function downloadProbeTestOnProgress(result) {
         option.series[0].data[0].value = result.bandwidth;

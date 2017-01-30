@@ -111,36 +111,17 @@
       var self =this;
 
      self.clientCallbackComplete(result);
-     /*
-      var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function() {
-          if (xhr.readyState === XMLHttpRequest.DONE) {
-            self._running=false;
-            var data = JSON.parse(xhr.responseText);
-            self.clientCallbackComplete(data);
-          }
-      };
-      var requestTimeout;
-      requestTimeout = setTimeout(xhr.abort.bind(xhr), this.probeTimeout);
-      xhr.abort = function(){
-       self.clientCallbackError(result);
-       clearTimeout(requestTimeout);
-      };
-       xhr.open('GET', this.dataUrl+ '?bufferSize=' + this.size + '&time='+result.time+'&sendBinary=false&lowLatency=' + this.lowLatency+'&r=' + Math.random(), true);
-       xhr.send(null);
-       */
+
    };
 
    /**
    * onProgress method
    * @param  result
    */
-   downloadProbeTest.prototype.onTestProgress = function(result){ // jshint ignore:line
-     //console.log(result.bandwidth);
-     //this.size = this.size + result;
+   downloadProbeTest.prototype.onTestProgress = function(result){
      result.running = true;
      this.clientCallbackProgress(result);
-     //{id: 1, totalTime: 132, bandwidth: 7.954121212121212, loaded: 131243}
+
 
    };
 
