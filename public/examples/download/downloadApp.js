@@ -37,6 +37,7 @@
   var probeRuns = 20;
   var counter = 0;
   var currentTest;
+  var probeTimeout = 3000;
     function initTest() {
         function addEvent(el, ev, fn) {
             void (el.addEventListener && el.addEventListener(ev, fn, false));
@@ -190,7 +191,7 @@
           option.series[0].data[0].value = result.bandwidth;
           myChart.setOption(option, true);
           if(result.running) {
-
+              probeTimeout = probeTimeout - result.time;
               downloadSize = downloadSize * 2;
               downloadProbe();
           }
@@ -209,7 +210,7 @@
             //use default value for download testing
             //void (!(testPlan.hasIPv6 === 'IPv6') && setTimeout(function () { downloadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'); }, 500));
         }
-        var downloadProbeTestRun = new window.downloadProbeTest('http://' + testPlan.baseUrlIPv4 +'/download?bufferSize='+downloadSize, 'http://' + testPlan.baseUrlIPv4 + '/downloadProbe', false, 3000,downloadSize,downloadProbeTestOnComplete,
+        var downloadProbeTestRun = new window.downloadProbeTest('http://' + testPlan.baseUrlIPv4 +'/download?bufferSize='+downloadSize, 'http://' + testPlan.baseUrlIPv4 + '/downloadProbe', false, probeTimeout,downloadSize,downloadProbeTestOnComplete,
             downloadProbeTestOnError,downloadProbeTestOnProgress);
         downloadProbeTestRun.start();
 

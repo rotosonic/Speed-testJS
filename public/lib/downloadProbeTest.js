@@ -42,10 +42,11 @@
      this.clientCallbackComplete = callbackComplete;
      this.clientCallbackError = callbackError;
      this.clientCallbackProgress = callbackProgress;
-     //probe timeout call
-     this.probeTimeout = 1000;
      //monitor interval
      this.interval=null;
+     //max download size
+    this.maxLoadedSize;
+
    }
 
    /**
@@ -82,8 +83,9 @@
    */
    downloadProbeTest.prototype.onTestAbort = function (result) {
      result.running = false;
-     console.log('testAbort');
-     console.log(result);
+     if(result.loaded < this.maxLoadedSize){
+       result.loaded = this.maxLoadedSize;
+     }
      clearInterval(this.interval);
      this.clientCallbackComplete(result);
        if(this._running){
@@ -106,9 +108,9 @@
    */
    downloadProbeTest.prototype.onTestComplete = function (result) {
       clearInterval(this.interval);
-
-     result.running = true;
-      var self =this;
+     var self =this;
+      result.running = true;
+     self.maxLoadedSize = result.loaded;
 
      self.clientCallbackComplete(result);
 
