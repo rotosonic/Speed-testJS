@@ -83,8 +83,8 @@
    */
    downloadProbeTest.prototype.onTestAbort = function (result) {
      result.running = false;
-     if(result.loaded < this.maxLoadedSize){
-       result.loaded = this.maxLoadedSize;
+     if(result.loaded < this.size){
+       result.loaded = this.size;
      }
      clearInterval(this.interval);
      this.clientCallbackComplete(result);
@@ -110,8 +110,6 @@
       clearInterval(this.interval);
      var self =this;
       result.running = true;
-     self.maxLoadedSize = result.loaded;
-
      self.clientCallbackComplete(result);
 
    };
