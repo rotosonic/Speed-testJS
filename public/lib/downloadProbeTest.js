@@ -82,14 +82,16 @@
    * @param abort object
    */
    downloadProbeTest.prototype.onTestAbort = function (result) {
+     console.log('onTestAbortCalled');
      result.running = false;
      if(result.loaded < this.size){
        result.loaded = this.size;
      }
      clearInterval(this.interval);
-     this.clientCallbackComplete(result);
+
        if(this._running){
-            //this.clientCallbackError(result);
+         this._running=false;
+         this.clientCallbackComplete(result);
         }
    };
 

@@ -199,6 +199,8 @@
               downloadProbe();
           }
           else{
+            console.log('downloadProbeCompleted');
+          console.dir(result);
             downloadSize = result.loaded;
             if(result.bandwidth<=20){
               concurrentDownloads = 1;
