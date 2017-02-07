@@ -31,12 +31,17 @@
     this.transferSize = transferSize;
     this.callbackOnMessage = callbackOnMessage;
     this.callbackOnError = callbackOnError;
+    this.concurrentRuns = 4;
     //unique id or test
     this._testIndex = 0;
     //array for packet loss;
     this.packetLossArray = [];
     //array for results
     this.resultsArray = [];
+    //start data capture time
+    this.startDataCapture;
+    //array for results and time from test start
+    this.resultsTimeArray = [];
     //start time data capture
 
   }
@@ -59,17 +64,14 @@
    * webSocket onOpen Event
    */
   webSocketDownload.prototype._handleOnOpen = function () {
-    this._testIndex++;
     var obj = {'data': this.transferSize, 'flag': 'download', id:this._testIndex,size: this.transferSize};
-
-    this.sendMessage(obj);
+    this.startMessages();
   };
 
   /**
    * send message for current webSocket
    */
   webSocketDownload.prototype.sendMessage = function (message) {
-    //var obj = {'data': this.transferSize, 'flag': 'download'};
     this._request.send(JSON.stringify(message), {mask: true});
   };
 
@@ -77,9 +79,20 @@
    * webSocket onMessage received Event
    */
   webSocketDownload.prototype._handleOnMessage = function (event) {
+    var data = JSON.parse(event.data);
     this.controller(event);
   };
 
+  /**
+   * webSocket onMessage received Event
+   */
+  webSocketDownload.prototype.startMessages = function (event) {
+    for (var g = 1; g <= this.concurrentRuns; g++) {
+      this._testIndex++;
+      var obj = {'data': this.transferSize, 'flag': 'download', id:this._testIndex,size: this.transferSize};
+      this.sendMessage(obj);
+    }
+  };
 
   /**
    * webSocket onMessage error Event
@@ -88,7 +101,9 @@
     var data = JSON.parse(event.data);
     var id = data.id;
     var packetLoss = (parseFloat(data.binary.data.length) - parseFloat(data.dataLength));
-    console.log(packetLoss);
+    if(id==1){
+
+    }
     if(packetLoss>0){
       this.packetLossArray.push(packetLoss);
     }
@@ -96,11 +111,9 @@
     var timeInSeconds = (Date.now() -data.startTime) /1000;
     var bandwidthMbs = dataInMb/timeInSeconds;
     this.resultsArray.push(bandwidthMbs);
-    if(this._testIndex< 10){
-      this._testIndex++;
-      this.transferSize = this.transferSize*2
-      var obj = {'data': this.transferSize, 'flag': 'download', id:this._testIndex,size: this.transferSize};
-      this.sendMessage(obj);
+    if(id< 40){
+      this.transferSize = this.transferSize;
+      this.startMessages();
     }
     else{
       this.close();
