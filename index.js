@@ -98,22 +98,22 @@ wss.on('connection', function connection(ws) {
 
     ws.on('message', function incoming(messageObj) {
         var message = JSON.parse(messageObj);
-        /*
-         if (message.flag === 'download'){
-         var img = images[message.data];
-         console.log(img);
+        if (message.flag === 'download'){
+         console.log(message);
+            var buffer = new Buffer(message.size);
+            buffer.write('Hello');
+            console.log(buffer.toString().length);
          var request_obj = {
-         JSONimg : {
-         'type' : 'img',
-         'data' : img,
+         binary : {
+         'data' : buffer.toString(),
          },
-         startTIME : new Date().getTime()
+         startTime : Date.now(),
+         dataLength: buffer.toString().length,
+         id: message.id
          }
          console.log("Trying to send using websockets")
          ws.send(JSON.stringify(request_obj));
-         } else if (message.flag === 'latency'){
-         */
-        if (message.flag === 'latency') {
+         } else if (message.flag === 'latency') {
             console.log('received: %s', new Date().getTime());
             ws.send(message.data);
         } else if (message.flag === 'upload') {

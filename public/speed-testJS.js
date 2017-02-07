@@ -117,10 +117,26 @@
                 }
             }
 
-            latencyTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4');
+          webSocketDownload();
+            //latencyTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4');
 
         });
     }
+
+  function webSocketDownload(){
+
+    function webSocketDownloadOnComplete(result) {
+      console.log(result);
+    }
+
+    function webSocketDownloadOnError(result) {
+      console.log(result);
+    }
+
+    var webSocketDownload = new window.webSocketDownload(testPlan.webSocketUrlIPv4, 10000, webSocketDownloadOnComplete,
+      webSocketDownloadOnError);
+    webSocketDownload.start();
+  }
 
     function hasClass(el, className) {
         return (el.classList) ? el.classList.contains(className) : !!el.className.match(new RegExp('(\\s|^)' + className + '(\\s|$)'));
