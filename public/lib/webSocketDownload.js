@@ -27,11 +27,11 @@
    * @param function callback for onerror function
    */
   function webSocketDownload(url, transferSize, callbackOnMessage, callbackOnError) {
-    this.url = url;
+    this.url = 'ws://96.118.189.161:5003';
     this.transferSize = transferSize;
     this.callbackOnMessage = callbackOnMessage;
     this.callbackOnError = callbackOnError;
-    this.concurrentRuns = 4;
+    this.concurrentRuns = 40;
     //unique id or test
     this._testIndex = 0;
     //array for packet loss;
@@ -110,6 +110,7 @@
     var dataInMb  =(data.binary.data.length* 8) / 1000000;
     var timeInSeconds = (Date.now() -data.startTime) /1000;
     var bandwidthMbs = dataInMb/timeInSeconds;
+    console.log(bandwidthMbs);
     this.resultsArray.push(bandwidthMbs);
     if(id< 40){
       this.transferSize = this.transferSize;
