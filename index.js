@@ -29,6 +29,24 @@ var apiRouter = express.Router();
 //module provides download test sizes based off of probe data
 var downloadData = require('./modules/downloadData');
 
+var fs = require('fs');
+var appRoot =process.cwd();
+var buffer750;
+fs.stat(appRoot + '/public/img/random750x750.jpg', function(err, stat) {
+  if(err === null) {
+    console.log('File exists');
+    fs.readFile(appRoot + '/public/img/random750x750.jpg', function(err, buf){
+      if (err) throw err;
+      buffer750 = buf;
+      console.log(buffer750.byteLength);
+    });
+  } else if(err.code === 'ENOENT') {
+    console.log('File does not exists');
+  } else {
+    console.log('Some other error: ', err.code);
+  }
+});
+
 //set global ipv4 and ipv6 server address
 domain.setIpAddresses();
 
@@ -104,22 +122,17 @@ wss.on('connection', function connection(ws) {
 
     ws.on('message', function incoming(messageObj) {
         var message = JSON.parse(messageObj);
-        /*
-         if (message.flag === 'download'){
-         var img = images[message.data];
-         console.log(img);
+        if (message.flag === 'download'){
          var request_obj = {
-         JSONimg : {
-         'type' : 'img',
-         'data' : img,
+         binary : {
+         'data' : buffer750,
          },
-         startTIME : new Date().getTime()
+         startTime : Date.now(),
+         dataLength: buffer750.byteLength,
+         id: message.id
          }
-         console.log("Trying to send using websockets")
          ws.send(JSON.stringify(request_obj));
-         } else if (message.flag === 'latency'){
-         */
-        if (message.flag === 'latency') {
+         } else if (message.flag === 'latency') {
             console.log('received: %s', new Date().getTime());
             ws.send(message.data);
         } else if (message.flag === 'upload') {

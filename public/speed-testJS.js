@@ -123,10 +123,26 @@
         }
       }
 
-      latencyTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4');
-
+      //latencyTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4');
+      webSocketDownload();
     });
   }
+
+  function webSocketDownload(){
+
+    function webSocketDownloadOnComplete(result) {
+      console.log(result);
+    }
+
+    function webSocketDownloadOnError(result) {
+      console.log(result);
+    }
+
+    var webSocketDataTransfer = new window.webSocketDataTransfer(testPlan.webSocketUrlIPv4, 100000, webSocketDownloadOnComplete,
+      webSocketDownloadOnError);
+    webSocketDataTransfer.start();
+  }
+
 
   function hasClass(el, className) {
     return (el.classList) ? el.classList.contains(className) : !!el.className.match(new RegExp('(\\s|^)' + className + '(\\s|$)'));
