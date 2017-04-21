@@ -27,13 +27,15 @@
    * @param function callback for onerror function
    */
   function webSocketDownload(url, transferSize, callbackOnMessage, callbackOnError) {
-    this.url = 'ws://96.118.189.161:5003';
-    this.transferSize = transferSize;
+    //this.url = 'ws://192.168.43.62:8081';
+    this.url = 'ws://127.0.0.1:8081';
+    this.transferSize = 500000;
     this.callbackOnMessage = callbackOnMessage;
     this.callbackOnError = callbackOnError;
-    this.concurrentRuns = 40;
+    this.concurrentRuns = 3;
+    this.testLength = 10000;
     //unique id or test
-    this._testIndex = 0;
+    this._testIndex = 1;
     //array for packet loss;
     this.packetLossArray = [];
     //array for results
@@ -42,55 +44,83 @@
     this.startDataCapture;
     //array for results and time from test start
     this.resultsTimeArray = [];
-    //start time data capture
-
+    //monitor interval
+    this.interval = null;
+    //start time of test suite
+    this.beginTime;
+    //time for monitor to calcualte stats
+    this.monitorInterval = 100;
+    //results object array
+    this.results =[];
+    //boolean on whether test  suite is running or not
+    this._running = true;
+    //webSockets array
+    this.webSockets = [];
   }
 
   /**
    * Initiate the request
    */
   webSocketDownload.prototype.start = function () {
-    if (this._request === null ||
-      typeof this._request === 'undefined') {
-      this._request = new WebSocket(this.url);
-      this._request.onopen = this._handleOnOpen.bind(this);
-      this._request.onmessage = this._handleOnMessage.bind(this);
-      this._request.onclose = this._handleOnClose.bind(this);
-      this._request.onerror = this._handleOnError.bind(this);
+    for (var g = 0; g <= this.concurrentRuns; g++) {
+      this.createSocket(g);
     }
+    var self = this;
+    this.beginTime = Date.now();
+    this.interval = setInterval(function () {
+      self._monitor();
+    }, this.monitorInterval);
+
   };
 
   /**
-   * webSocket onOpen Event
+   * Initiate the request
    */
-  webSocketDownload.prototype._handleOnOpen = function () {
-    var obj = {'data': this.transferSize, 'flag': 'download', id:this._testIndex,size: this.transferSize};
-    this.startMessages();
+  webSocketDownload.prototype.createSocket = function (g) {
+    var webSocket = new window.webSocketUpDown(this.url,this.onTestOpen.bind(this),
+       this.onMessageComplete.bind(this),this.onTestError.bind(this));
+       webSocket.start(g);
+    this.webSockets.push(webSocket);
+  };
+
+  /**
+   * onError method
+   * @return abort object
+   */
+  webSocketDownload.prototype.onTestOpen = function (id) {
+    var obj = {'data': this.transferSize, 'flag': 'download', 'id':id, 'size': this.transferSize};
+    this.webSockets[id].sendMessage(obj);
+  };
+
+  /**
+   * onError method
+   * @return abort object
+   */
+  webSocketDownload.prototype.onTestError = function (error) {
+    console.log('error: ' + error);
+  };
+
+  /**
+   * onMessageComplete method
+   * @return message object
+   */
+  webSocketDownload.prototype.onMessageComplete = function (result) {
+    var event={};
+    var data = JSON.parse(result.data);
+    event.startTime = data.startTime;
+    event.endTime = Date.now();
+    event.id = data.id;
+    event.dataLength = data.dataLength;
+    this.controller(event);
   };
 
   /**
    * send message for current webSocket
    */
-  webSocketDownload.prototype.sendMessage = function (message) {
-    this._request.send(JSON.stringify(message), {mask: true});
-  };
-
-  /**
-   * webSocket onMessage received Event
-   */
-  webSocketDownload.prototype._handleOnMessage = function (event) {
-    var data = JSON.parse(event.data);
-    this.controller(event);
-  };
-
-  /**
-   * webSocket onMessage received Event
-   */
-  webSocketDownload.prototype.startMessages = function (event) {
-    for (var g = 1; g <= this.concurrentRuns; g++) {
-      this._testIndex++;
-      var obj = {'data': this.transferSize, 'flag': 'download', id:this._testIndex,size: this.transferSize};
-      this.sendMessage(obj);
+  webSocketDownload.prototype.sendMessage = function (id) {
+    if(this._running){
+      var obj = {'data': this.transferSize, 'flag': 'download', 'id':id, 'size': 750};
+      this.webSockets[id].sendMessage(obj);
     }
   };
 
@@ -98,30 +128,54 @@
    * webSocket onMessage error Event
    */
   webSocketDownload.prototype.controller = function (event) {
-    var data = JSON.parse(event.data);
-    var id = data.id;
-    var packetLoss = (parseFloat(data.binary.data.length) - parseFloat(data.dataLength));
-    if(id==1){
+    if(!this._running){
+      console.log('stopRunning');
+      return;
+    }
 
-    }
-    if(packetLoss>0){
-      this.packetLossArray.push(packetLoss);
-    }
-    var dataInMb  =(data.binary.data.length* 8) / 1000000;
-    var timeInSeconds = (Date.now() -data.startTime) /1000;
+    var id = event.id;
+    var dataInMb  =(event.dataLength* 8) / 1000000;
+    var timeInSeconds = (event.endTime - event.startTime) /1000;
     var bandwidthMbs = dataInMb/timeInSeconds;
-    console.log(bandwidthMbs);
+    console.log(id + ':  '  + bandwidthMbs);
+    var result={};
+    result.bandwidthMbs = bandwidthMbs;
+    result.recordTime = Date.now();
+    this.results.push(result);
     this.resultsArray.push(bandwidthMbs);
-    if(id< 40){
-      this.transferSize = this.transferSize;
-      this.startMessages();
-    }
-    else{
-      this.close();
-      console.log(this.resultsArray);
-      console.log(this.packetLossArray);
-    }
+    this.transferSize = this.transferSize;
+    this.sendMessage(id);
+  };
 
+  /**
+  * Monitor testSeries
+  */
+  webSocketDownload.prototype._monitor = function () {
+    var self = this;
+    var intervalBandwidth = 0;
+    var totalLoaded = 0;
+    var totalTime = 0;
+    var intervalCounter = 0;
+    if (this.results.length > 0) {
+        for (var i = 0; i < this.results.length; i++) {
+          if (this.results[i].recordTime > (Date.now() - this.monitorInterval)) {
+              intervalBandwidth = intervalBandwidth + parseFloat(this.results[i].bandwidthMbs);
+              //totalLoaded = totalLoaded + this.results[i].chunckLoaded;
+              //totalTime = totalTime + this.results[i].totalTime;
+              intervalCounter++;
+          }
+        }
+        if (!isNaN(intervalBandwidth / intervalCounter)) {
+            console.log('BandWidth: ' + (intervalBandwidth / intervalCounter));
+        }
+    }
+    //console.log('timeRemaining: ' + (Date.now() - this.beginTime));
+    if ((Date.now() - this.beginTime) > (this.testLength)) {
+      this._running=false;
+      clearInterval(this.interval);
+      self.close();
+      console.log('stopRequest');
+    }
   };
 
 
@@ -133,22 +187,13 @@
   };
 
   /**
-   * webSocket close Event
-   */
-  webSocketDownload.prototype._handleOnClose = function (event) {
-    if ((event !== null) && (event.code === 1006)) {
-      this.callbackOnError('connection error');
-    }
-  };
-
-  /**
    * close webSocket
    */
   webSocketDownload.prototype.close = function () {
-    this._request.close();
+    for (var i = 0; i < this.webSockets.length; i++) {
+        this.webSockets[i].close();
+    }
   };
-
-
   window.webSocketDownload = webSocketDownload;
 
 })();

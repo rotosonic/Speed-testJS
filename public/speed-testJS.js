@@ -133,7 +133,7 @@
       console.log(result);
     }
 
-    var webSocketDownload = new window.webSocketDownload(testPlan.webSocketUrlIPv4, 10000, webSocketDownloadOnComplete,
+    var webSocketDownload = new window.webSocketDownload(testPlan.webSocketUrlIPv4, 100000, webSocketDownloadOnComplete,
       webSocketDownloadOnError);
     webSocketDownload.start();
   }
@@ -209,13 +209,13 @@
                 resultsEl[i].innerHTML = '';
             }
         }
-        
+
         setTimeout(downloadProbe(),500);
         //update button text to communicate current state of test as In Progress
         startTestButton.innerHTML = 'Testing in Progress ...';
         //disable button
         startTestButton.disabled = true;
-        //set accessiblity aria-disabled state. 
+        //set accessiblity aria-disabled state.
         //This will also effect the visual look by corresponding css
         startTestButton.setAttribute('aria-disabled', true);
     }
@@ -262,14 +262,14 @@
                 option.series[0].data[0].value = 0;
                 //updat test status to complete
                 option.series[0].data[0].name = 'Test Failed';
-                //set accessiblity aria-disabled state. 
+                //set accessiblity aria-disabled state.
                 //This will also effect the visual look by corresponding css
                 startTestButton.setAttribute('aria-disabled', false);
                //update button text to communicate current state of test as In Progress
                 startTestButton.innerHTML = 'Start Test';
                 //enable start button
                 startTestButton.disabled = false;
-                //hide current test value in chart 
+                //hide current test value in chart
                 option.series[0].detail.show = false;
                 //update gauge
                 myChart.setOption(option, true);
@@ -285,14 +285,14 @@
                 option.series[0].data[0].value = 0;
                 //updat test status to complete
                 option.series[0].data[0].name = 'Test Failed';
-                //set accessiblity aria-disabled state. 
+                //set accessiblity aria-disabled state.
                 //This will also effect the visual look by corresponding css
                 startTestButton.setAttribute('aria-disabled', false);
                //update button text to communicate current state of test as In Progress
                 startTestButton.innerHTML = 'Start Test';
                 //enable start button
                 startTestButton.disabled = false;
-                //hide current test value in chart 
+                //hide current test value in chart
                 option.series[0].detail.show = false;
                 //update gauge
                 myChart.setOption(option, true);
@@ -308,14 +308,14 @@
                 option.series[0].data[0].value = 0;
                 //updat test status to complete
                 option.series[0].data[0].name = 'Test Failed';
-                //set accessiblity aria-disabled state. 
+                //set accessiblity aria-disabled state.
                 //This will also effect the visual look by corresponding css
                 startTestButton.setAttribute('aria-disabled', false);
                //update button text to communicate current state of test as In Progress
                 startTestButton.innerHTML = 'Start Test';
                 //enable start button
                 startTestButton.disabled = false;
-                //hide current test value in chart 
+                //hide current test value in chart
                 option.series[0].detail.show = false;
                 //update gauge
                 myChart.setOption(option, true);
@@ -382,14 +382,14 @@
                 option.series[0].data[0].value = 0;
                 //updat test status to complete
                 option.series[0].data[0].name = 'Test Failed';
-                //set accessiblity aria-disabled state. 
+                //set accessiblity aria-disabled state.
                 //This will also effect the visual look by corresponding css
                 startTestButton.setAttribute('aria-disabled', false);
                //update button text to communicate current state of test as In Progress
                 startTestButton.innerHTML = 'Start Test';
                 //enable start button
                 startTestButton.disabled = false;
-                //hide current test value in chart 
+                //hide current test value in chart
                 option.series[0].detail.show = false;
                 //update gauge
                 myChart.setOption(option, true);
@@ -416,14 +416,14 @@
                 option.series[0].data[0].value = 0;
                 //updat test status to complete
                 option.series[0].data[0].name = 'Test Failed';
-                //set accessiblity aria-disabled state. 
+                //set accessiblity aria-disabled state.
                 //This will also effect the visual look by corresponding css
                 startTestButton.setAttribute('aria-disabled', false);
                //update button text to communicate current state of test as In Progress
                 startTestButton.innerHTML = 'Start Test';
                 //enable start button
                 startTestButton.disabled = false;
-                //hide current test value in chart 
+                //hide current test value in chart
                 option.series[0].detail.show = false;
                 //update gauge
                 myChart.setOption(option, true);
@@ -439,14 +439,14 @@
                 option.series[0].data[0].value = 0;
                 //updat test status to complete
                 option.series[0].data[0].name = 'Test Failed';
-                //set accessiblity aria-disabled state. 
+                //set accessiblity aria-disabled state.
                 //This will also effect the visual look by corresponding css
                 startTestButton.setAttribute('aria-disabled', false);
                //update button text to communicate current state of test as In Progress
                 startTestButton.innerHTML = 'Start Test';
                 //enable start button
                 startTestButton.disabled = false;
-                //hide current test value in chart 
+                //hide current test value in chart
                 option.series[0].detail.show = false;
                 //update gauge
                 myChart.setOption(option, true);
@@ -462,14 +462,14 @@
                 option.series[0].data[0].value = 0;
                 //updat test status to complete
                 option.series[0].data[0].name = 'Test Failed';
-                //set accessiblity aria-disabled state. 
+                //set accessiblity aria-disabled state.
                 //This will also effect the visual look by corresponding css
                 startTestButton.setAttribute('aria-disabled', false);
                //update button text to communicate current state of test as In Progress
                 startTestButton.innerHTML = 'Start Test';
                 //enable start button
                 startTestButton.disabled = false;
-                //hide current test value in chart 
+                //hide current test value in chart
                 option.series[0].detail.show = false;
                 //update gauge
                 myChart.setOption(option, true);
@@ -521,12 +521,12 @@
                 option.series[0].data[0].value = 0;
                 //updat test status to complete
                 option.series[0].data[0].name = 'Test Complete';
-                //set accessiblity aria-disabled state. 
+                //set accessiblity aria-disabled state.
                 //This will also effect the visual look by corresponding css
                 startTestButton.setAttribute('aria-disabled', false);
                 //enable start button
                 startTestButton.disabled = false;
-                //hide current test value in chart 
+                //hide current test value in chart
                 option.series[0].detail.show = false;
                 //update gauge
                 myChart.setOption(option, true);
@@ -558,14 +558,14 @@
                 option.series[0].data[0].value = 0;
                 //updat test status to complete
                 option.series[0].data[0].name = 'Test Failed';
-                //set accessiblity aria-disabled state. 
+                //set accessiblity aria-disabled state.
                 //This will also effect the visual look by corresponding css
                 startTestButton.setAttribute('aria-disabled', false);
                //update button text to communicate current state of test as In Progress
                 startTestButton.innerHTML = 'Start Test';
                 //enable start button
                 startTestButton.disabled = false;
-                //hide current test value in chart 
+                //hide current test value in chart
                 option.series[0].detail.show = false;
                 //update gauge
                 myChart.setOption(option, true);
@@ -580,14 +580,14 @@
                 option.series[0].data[0].value = 0;
                 //updat test status to complete
                 option.series[0].data[0].name = 'Test Failed';
-                //set accessiblity aria-disabled state. 
+                //set accessiblity aria-disabled state.
                 //This will also effect the visual look by corresponding css
                 startTestButton.setAttribute('aria-disabled', false);
                //update button text to communicate current state of test as In Progress
                 startTestButton.innerHTML = 'Start Test';
                 //enable start button
                 startTestButton.disabled = false;
-                //hide current test value in chart 
+                //hide current test value in chart
                 option.series[0].detail.show = false;
                 //update gauge
                 myChart.setOption(option, true);
@@ -602,14 +602,14 @@
                 option.series[0].data[0].value = 0;
                 //updat test status to complete
                 option.series[0].data[0].name = 'Test Failed';
-                //set accessiblity aria-disabled state. 
+                //set accessiblity aria-disabled state.
                 //This will also effect the visual look by corresponding css
                 startTestButton.setAttribute('aria-disabled', false);
                //update button text to communicate current state of test as In Progress
                 startTestButton.innerHTML = 'Start Test';
                 //enable start button
                 startTestButton.disabled = false;
-                //hide current test value in chart 
+                //hide current test value in chart
                 option.series[0].detail.show = false;
                 //update gauge
                 myChart.setOption(option, true);
