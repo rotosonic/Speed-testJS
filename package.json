@@ -1,10 +1,13 @@
 {
   "name": "speed-testjs",
-  "version": "1.0.23",
+  "version": "1.0.24",
   "description": "measure internet bandwidth",
   "main": "index.js",
   "author": "Maulan Byron",
   "license": "Apache License Version 2.0",
+  "config": {
+    "serveStaticWebSite": true
+  },
   "dependencies": {
     "aws-sdk": "^2.6.12",
     "body-parser": "^1.15.2",
@@ -27,6 +30,7 @@
     "karma-requirejs": "^1.1.0"
   },
   "scripts": {
-    "test": "./node_modules/karma/bin/karma start karma.conf.js"
+    "test": "./node_modules/karma/bin/karma start karma.conf.js",
+    "start": "node index.js"
   }
 }

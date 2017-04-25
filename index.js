@@ -85,49 +85,51 @@ module.exports.UploadProbeController = require('./controllers/UploadProbeControl
 module.exports.UploadController = require('./controllers/UploadController');
 module.exports.CalculatorController = require('./controllers/CalculatorController');
 module.exports.TestServerController = require('./controllers/TestServerController');
-
-app.use(express.static(path.join(__dirname, 'public')));
-app.listen(webPort, '::');
-app.listen(5020);
-app.listen(5021);
-app.listen(5022);
-app.listen(5023);
-app.listen(5024);
-app.listen(5025);
 //max download buffer size based off of download probing data
 global.maxDownloadBuffer = 532421875;
 global.maxUploadBuffer = 10000000;
+console.log('startSite: ' + process.env.npm_package_config_serveStaticWebSite);
+if(process.env.npm_package_config_serveStaticWebSite){
+  app.use(express.static(path.join(__dirname, 'public')));
+  app.listen(webPort, '::');
+  app.listen(5020);
+  app.listen(5021);
+  app.listen(5022);
+  app.listen(5023);
+  app.listen(5024);
+  app.listen(5025);
 
-var wss = new WebSocketServer({port: webSocketPort});
-wss.on('connection', function connection(ws) {
-    console.log('client connected');
+  var wss = new WebSocketServer({port: webSocketPort});
+  wss.on('connection', function connection(ws) {
+      console.log('client connected');
 
-    ws.on('message', function incoming(messageObj) {
-        var message = JSON.parse(messageObj);
-        /*
-         if (message.flag === 'download'){
-         var img = images[message.data];
-         console.log(img);
-         var request_obj = {
-         JSONimg : {
-         'type' : 'img',
-         'data' : img,
-         },
-         startTIME : new Date().getTime()
-         }
-         console.log("Trying to send using websockets")
-         ws.send(JSON.stringify(request_obj));
-         } else if (message.flag === 'latency'){
-         */
-        if (message.flag === 'latency') {
-            console.log('received: %s', new Date().getTime());
-            ws.send(message.data);
-        } else if (message.flag === 'upload') {
-            var uploadtime = {'data': Date.now().toString()};
-            ws.send(JSON.stringify(uploadtime.data));
-        } else {
-            console.log("error message");
-        }
+      ws.on('message', function incoming(messageObj) {
+          var message = JSON.parse(messageObj);
+          /*
+           if (message.flag === 'download'){
+           var img = images[message.data];
+           console.log(img);
+           var request_obj = {
+           JSONimg : {
+           'type' : 'img',
+           'data' : img,
+           },
+           startTIME : new Date().getTime()
+           }
+           console.log("Trying to send using websockets")
+           ws.send(JSON.stringify(request_obj));
+           } else if (message.flag === 'latency'){
+           */
+          if (message.flag === 'latency') {
+              console.log('received: %s', new Date().getTime());
+              ws.send(message.data);
+          } else if (message.flag === 'upload') {
+              var uploadtime = {'data': Date.now().toString()};
+              ws.send(JSON.stringify(uploadtime.data));
+          } else {
+              console.log("error message");
+          }
 
-    });
-});
+      });
+  });
+}
