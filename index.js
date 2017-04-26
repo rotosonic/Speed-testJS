@@ -32,6 +32,7 @@ var downloadData = require('./modules/downloadData');
 var fs = require('fs');
 var appRoot =process.cwd();
 var buffer750;
+var buffer352;
 fs.stat(appRoot + '/public/img/random750x750.jpg', function(err, stat) {
   if(err === null) {
     console.log('File exists');
@@ -46,6 +47,22 @@ fs.stat(appRoot + '/public/img/random750x750.jpg', function(err, stat) {
     console.log('Some other error: ', err.code);
   }
 });
+fs.stat(appRoot + '/public/img/image-3.png', function(err, stat) {
+  if(err === null) {
+    console.log('File exists');
+    fs.readFile(appRoot + '/public/img/image-3.png', function(err, buf){
+      if (err) throw err;
+      buffer352 = buf;
+      console.log(buffer352.byteLength);
+    });
+  } else if(err.code === 'ENOENT') {
+    console.log('File does not exists');
+  } else {
+    console.log('Some other error: ', err.code);
+  }
+});
+
+
 
 //set global ipv4 and ipv6 server address
 domain.setIpAddresses();
@@ -116,22 +133,27 @@ app.listen(5025);
 global.maxDownloadBuffer = 532421875;
 global.maxUploadBuffer = 10000000;
 
-var wss = new WebSocketServer({port: webSocketPort});
+var wss = new WebSocketServer({perMessageDeflate: false,port: webSocketPort});
 wss.on('connection', function connection(ws) {
     console.log('client connected');
 
     ws.on('message', function incoming(messageObj) {
         var message = JSON.parse(messageObj);
         if (message.flag === 'download'){
+          var buf = new Buffer(message.size);
+          ws.send(buf);
+/*
          var request_obj = {
          binary : {
-         'data' : buffer750,
+         'data' : buffer352,
          },
          startTime : Date.now(),
-         dataLength: buffer750.byteLength,
+         dataLength: buffer352.byteLength,
          id: message.id
          }
          ws.send(JSON.stringify(request_obj));
+*/
+
          } else if (message.flag === 'latency') {
             console.log('received: %s', new Date().getTime());
             ws.send(message.data);

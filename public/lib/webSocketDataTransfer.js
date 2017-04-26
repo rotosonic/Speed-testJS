@@ -29,11 +29,11 @@
   function webSocketDataTransfer(url, transferSize, callbackOnMessage, callbackOnError) {
     //this.url = 'ws://192.168.43.62:8081';
     this.url = 'ws://127.0.0.1:8081';
-    this.transferSize = 500000;
+    this.transferSize = 100000;
     this.callbackOnMessage = callbackOnMessage;
     this.callbackOnError = callbackOnError;
     this.concurrentRuns = 3;
-    this.testLength = 10000;
+    this.testLength = 12000;
     //unique id or test
     this._testIndex = 1;
     //array for packet loss;
@@ -49,13 +49,15 @@
     //start time of test suite
     this.beginTime;
     //time for monitor to calcualte stats
-    this.monitorInterval = 100;
+    this.monitorInterval = 50;
     //results object array
     this.results =[];
     //boolean on whether test  suite is running or not
     this._running = true;
     //webSockets array
     this.webSockets = [];
+    //webSocketsBufferedAmount
+    this.webSocketsBufferedAmount=0;
   }
 
   /**
@@ -88,8 +90,9 @@
    * @return abort object
    */
   webSocketDataTransfer.prototype.onTestOpen = function (id) {
-    var obj = {'data': this.transferSize, 'flag': 'download', 'id':id, 'size': this.transferSize};
-    this.webSockets[id].sendMessage(obj);
+    //var obj = {'data': this.transferSize, 'flag': 'download', 'id':id, 'size': this.transferSize};
+    console.log('webSocketOpen: ' + id);
+    this.sendMessage(id);
   };
 
   /**
@@ -105,13 +108,21 @@
    * @return message object
    */
   webSocketDataTransfer.prototype.onMessageComplete = function (result) {
-    var event={};
-    var data = JSON.parse(result.data);
-    event.startTime = data.startTime;
-    event.endTime = Date.now();
-    event.id = data.id;
-    event.dataLength = data.dataLength;
-    this.controller(event);
+    //console.log(result);
+    var event = {};
+    event.sizeMb = (result.data.size * 8) / 1000000;
+    event.timeStamp = Date.now();
+    this.results.push(event);
+    // if bufferedAmount === 0 then increase transferSize
+    if(this.webSocketsBufferedAmount===0){
+      this.transferSize = this.transferSize ;
+      this.sendMessage(-1);
+      console.log('additional reqeust: ' + this.transferSize);
+    }
+    else{
+      console.log('webSocketsBufferedAmount: ' + this.webSocketsBufferedAmount);
+    }
+
   };
 
   /**
@@ -119,8 +130,21 @@
    */
   webSocketDataTransfer.prototype.sendMessage = function (id) {
     if(this._running){
-      var obj = {'data': this.transferSize, 'flag': 'download', 'id':id, 'size': 750};
-      this.webSockets[id].sendMessage(obj);
+      this.webSocketsBufferedAmount=0;
+      var obj = {'data': this.transferSize, 'flag': 'download', 'id':id, 'size': this.transferSize};
+      if(id !== -1){
+        this.webSockets[id].sendMessage(obj);
+      }else{
+        for (var i = 0; i < this.webSockets.length; i++) {
+          if((this.webSockets[i]._request.bufferedAmount===0)&&(this.webSockets[i]._request.readyState===1)){
+
+            this.webSockets[i].sendMessage(obj);
+          }
+          this.webSocketsBufferedAmount = this.webSocketsBufferedAmount +  this.webSockets[i]._request.bufferedAmount;
+              //console.log('i: ' + this.webSockets[i]._request.bufferedAmount + '  state: ' + this.webSockets[i]._request.readyState);
+        }
+      }
+
     }
   };
 
@@ -132,19 +156,20 @@
       console.log('stopRunning');
       return;
     }
-
+/*
     var id = event.id;
     var dataInMb  =(event.dataLength* 8) / 1000000;
     var timeInSeconds = (event.endTime - event.startTime) /1000;
     var bandwidthMbs = dataInMb/timeInSeconds;
-    console.log(id + ':  '  + bandwidthMbs);
+    //console.log(id + ':  '  + bandwidthMbs);
     var result={};
     result.bandwidthMbs = bandwidthMbs;
     result.recordTime = Date.now();
     this.results.push(result);
     this.resultsArray.push(bandwidthMbs);
     this.transferSize = this.transferSize;
-    this.sendMessage(id);
+    */
+    //this.sendMessage(id);
   };
 
   /**
@@ -156,20 +181,23 @@
     var totalLoaded = 0;
     var totalTime = 0;
     var intervalCounter = 0;
+
     if (this.results.length > 0) {
         for (var i = 0; i < this.results.length; i++) {
-          if (this.results[i].recordTime > (Date.now() - this.monitorInterval)) {
-              intervalBandwidth = intervalBandwidth + parseFloat(this.results[i].bandwidthMbs);
-              //totalLoaded = totalLoaded + this.results[i].chunckLoaded;
+          if (this.results[i].timeStamp > (Date.now() - this.monitorInterval)) {
+              //intervalBandwidth = intervalBandwidth + parseFloat(this.results[i].bandwidthMbs);
+              totalLoaded = totalLoaded + this.results[i].sizeMb;
+
               //totalTime = totalTime + this.results[i].totalTime;
               intervalCounter++;
           }
         }
-        if (!isNaN(intervalBandwidth / intervalCounter)) {
-            console.log('BandWidth: ' + (intervalBandwidth / intervalCounter));
+        if (!isNaN(totalLoaded / this.monitorInterval)) {
+            console.log('BandWidth: ' + (totalLoaded / this.monitorInterval));
+            console.log(' counter: '  + intervalCounter + ' loaded: ' + totalLoaded);
         }
     }
-    //console.log('timeRemaining: ' + (Date.now() - this.beginTime));
+    console.log('timeRemaining: ' + (Date.now() - this.beginTime));
     if ((Date.now() - this.beginTime) > (this.testLength)) {
       this._running=false;
       clearInterval(this.interval);

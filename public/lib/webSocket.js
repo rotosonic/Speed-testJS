@@ -45,6 +45,7 @@
             this._request.onmessage = this._handleOnMessage.bind(this);
             this._request.onclose = this._handleOnClose.bind(this);
             this._request.onerror = this._handleOnError.bind(this);
+            this._request.binaryType = 'arraybuffer';
         }
     };
 
