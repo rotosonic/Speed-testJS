@@ -29,41 +29,6 @@ var apiRouter = express.Router();
 //module provides download test sizes based off of probe data
 var downloadData = require('./modules/downloadData');
 
-var fs = require('fs');
-var appRoot =process.cwd();
-var buffer750;
-var buffer352;
-fs.stat(appRoot + '/public/img/random750x750.jpg', function(err, stat) {
-  if(err === null) {
-    console.log('File exists');
-    fs.readFile(appRoot + '/public/img/random750x750.jpg', function(err, buf){
-      if (err) throw err;
-      buffer750 = buf;
-      console.log(buffer750.byteLength);
-    });
-  } else if(err.code === 'ENOENT') {
-    console.log('File does not exists');
-  } else {
-    console.log('Some other error: ', err.code);
-  }
-});
-fs.stat(appRoot + '/public/img/image-3.png', function(err, stat) {
-  if(err === null) {
-    console.log('File exists');
-    fs.readFile(appRoot + '/public/img/image-3.png', function(err, buf){
-      if (err) throw err;
-      buffer352 = buf;
-      console.log(buffer352.byteLength);
-    });
-  } else if(err.code === 'ENOENT') {
-    console.log('File does not exists');
-  } else {
-    console.log('Some other error: ', err.code);
-  }
-});
-
-
-
 //set global ipv4 and ipv6 server address
 domain.setIpAddresses();
 
@@ -138,32 +103,31 @@ wss.on('connection', function connection(ws) {
     console.log('client connected');
 
     ws.on('message', function incoming(messageObj) {
+      //check if message is json.. if not then it is an upload test
+      try {
+        JSON.parse(messageObj);
+        } catch (e) {
+            var result = {};
+            result.endTime  = Date.now();
+            result.uploadBytes = messageObj.byteLength;
+            ws.send(JSON.stringify(result));
+            return;
+        }
+
         var message = JSON.parse(messageObj);
         if (message.flag === 'download'){
           var dataBuffer = new Buffer(message.size);
           ws.send(dataBuffer);
-
-/*
-         var request_obj = {
-         binary : {
-         'data' : buffer352,
-         },
-         startTime : Date.now(),
-         dataLength: buffer352.byteLength,
-         id: message.id
-         }
-         ws.send(JSON.stringify(request_obj));
-*/
-
          } else if (message.flag === 'latency') {
             console.log('received: %s', new Date().getTime());
             ws.send(message.data);
         } else if (message.flag === 'upload') {
             var uploadtime = {'data': Date.now().toString()};
-            console.log(message.data.byteLength);
+            var dataBuffer = new Buffer(message.data);
+              console.log(dataBuffer.byteLength);
             ws.send(JSON.stringify(uploadtime.data));
         } else {
-            console.log("error message");
+
         }
 
     });

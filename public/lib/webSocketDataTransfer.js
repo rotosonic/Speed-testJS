@@ -135,7 +135,7 @@
            uploadData[i] = 32 + Math.random() * 95;
          }
         var obj = {'data': uploadData, 'flag': 'upload', 'id':id, 'size': this.transferSize};
-        this.webSockets[id].sendMessage(obj);
+        this.webSockets[id].sendMessage(uploadData);
       }
     }
   };

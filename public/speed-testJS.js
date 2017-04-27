@@ -138,11 +138,11 @@
       console.log(result);
     }
     //download
-    //var webSocketDataTransfer = new window.webSocketDataTransfer(testPlan.webSocketUrlIPv4, 100000, 'download',webSocketDownloadOnComplete,
-    //  webSocketDownloadOnError);
-    //upload
-    var webSocketDataTransfer = new window.webSocketDataTransfer(testPlan.webSocketUrlIPv4, 50000, 'upload',webSocketDownloadOnComplete,
+    var webSocketDataTransfer = new window.webSocketDataTransfer(testPlan.webSocketUrlIPv4, 100000, 'download',webSocketDownloadOnComplete,
       webSocketDownloadOnError);
+    //upload
+    //var webSocketDataTransfer = new window.webSocketDataTransfer(testPlan.webSocketUrlIPv4, 50000, 'upload',webSocketDownloadOnComplete,
+    //  webSocketDownloadOnError);
     webSocketDataTransfer.start();
   }
 
