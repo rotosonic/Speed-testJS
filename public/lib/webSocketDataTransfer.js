@@ -27,8 +27,8 @@
    * @param function callback for onerror function
    */
   function webSocketDataTransfer(url, transferSize, type, callbackOnMessage, callbackOnError) {
-    //this.url = 'ws://192.168.43.62:8081';
-    this.url = 'ws://127.0.0.1:8081';
+    this.url = 'ws://96.118.56.109:5003';
+    //this.url = 'ws://127.0.0.1:8081';
     this.transferSize = transferSize;
     this.type = type;
     this.callbackOnMessage = callbackOnMessage;
@@ -57,8 +57,10 @@
     this._running = true;
     //webSockets array
     this.webSockets = [];
-    //webSocketsBufferedAmount
-    this.webSocketsBufferedAmount=0;
+    //begin time of test
+    this.beginTime;
+    //total bytes of the test
+    this.totalBytes = 0;
   }
 
   /**
@@ -108,12 +110,17 @@
   webSocketDataTransfer.prototype.onMessageComplete = function (result) {
     var event = {};
     event.type = result.type;
+    this.totalBytes += result.chunckLoaded;
+    console.log('******** Transfer Speed Total Bytes ************');
+    console.log((this.totalBytes)/((Date.now() - this.beginTime)/1000));
+    //totalbytes /dateNow-begintime;
     if(result.type === 'download'){
-      
+
       if((result.totalTime< 50) && (this.transferSize < 800000)){
         this.transferSize = this.transferSize + this.transferSize;
       }
     }else{
+
 
     }
     this.sendMessage(result.id);
