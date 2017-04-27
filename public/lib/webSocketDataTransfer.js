@@ -107,9 +107,14 @@
    */
   webSocketDataTransfer.prototype.onMessageComplete = function (result) {
     var event = {};
-    console.log('totalTime: ' + result.totalTime);
-    if((result.totalTime< 50) && (this.transferSize < 800000)){
-      this.transferSize = this.transferSize + this.transferSize;
+    event.type = result.type;
+    if(result.type === 'download'){
+      console.log('totalTime: ' + result.totalTime);
+      if((result.totalTime< 50) && (this.transferSize < 800000)){
+        this.transferSize = this.transferSize + this.transferSize;
+      }
+    }else{
+
     }
     this.sendMessage(result.id);
 
@@ -122,10 +127,15 @@
   webSocketDataTransfer.prototype.sendMessage = function (id) {
     if(this._running){
       if(this.type === 'download'){
-        var obj = {'data': this.transferSize, 'flag': 'download', 'id':id, 'size': this.transferSize};
+        var obj = {'flag': 'download', 'id':id, 'size': this.transferSize};
         this.webSockets[id].sendMessage(obj);
       }else{
-
+        var uploadData = new Uint8Array(this.transferSize);
+        for (var i = 0; i < uploadData.length; i++) {
+           uploadData[i] = 32 + Math.random() * 95;
+         }
+        var obj = {'data': uploadData, 'flag': 'upload', 'id':id, 'size': this.transferSize};
+        this.webSockets[id].sendMessage(obj);
       }
     }
   };

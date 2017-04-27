@@ -160,6 +160,7 @@ wss.on('connection', function connection(ws) {
             ws.send(message.data);
         } else if (message.flag === 'upload') {
             var uploadtime = {'data': Date.now().toString()};
+            console.log(message.data.byteLength);
             ws.send(JSON.stringify(uploadtime.data));
         } else {
             console.log("error message");
