@@ -29,7 +29,7 @@
   function webSocketDataTransfer(url, transferSize, type, callbackOnMessage, callbackOnError) {
     //this.url = 'ws://192.168.43.62:8081';
     this.url = 'ws://127.0.0.1:8081';
-    this.transferSize = 100000;
+    this.transferSize = transferSize;
     this.type = type;
     this.callbackOnMessage = callbackOnMessage;
     this.callbackOnError = callbackOnError;
@@ -109,7 +109,7 @@
     var event = {};
     event.type = result.type;
     if(result.type === 'download'){
-      console.log('totalTime: ' + result.totalTime);
+      
       if((result.totalTime< 50) && (this.transferSize < 800000)){
         this.transferSize = this.transferSize + this.transferSize;
       }
@@ -165,7 +165,7 @@
             //console.log(' counter: '  + intervalCounter + ' loaded: ' + totalLoaded);
         }
     }
-    console.log('timeRemaining: ' + (Date.now() - this.beginTime));
+    //console.log('timeRemaining: ' + (Date.now() - this.beginTime));
     if ((Date.now() - this.beginTime) > (this.testLength)) {
       this._running=false;
       clearInterval(this.interval);
