@@ -52,8 +52,9 @@
     /**
      * start the request
      */
-    webSocketData.prototype.start = function(id){
+    webSocketData.prototype.start = function(id, type){
       this.id = id;
+      this.type = type;
       this._initiateRequest();
     };
 
@@ -78,12 +79,18 @@
      */
     webSocketData.prototype._handleOnMessage = function (event) {
         var result={};
-        result.id = this.id
-        result.event = event;
-        result.chunckLoaded = (event.data.byteLength * 8) / 1000000;
-        result.totalTime = (Date.now() - this.startTime)/1000;
-        result.bandwidthMbs = result.chunckLoaded/result.totalTime;
-        console.log(result.bandwidthMbs);
+        result.type = this.type;
+        if (this.type==='download') {
+          result.id = this.id
+          result.event = event;
+          result.chunckLoaded = (event.data.byteLength * 8) / 1000000;
+          result.totalTime = (Date.now() - this.startTime)/1000;
+          result.bandwidthMbs = result.chunckLoaded/result.totalTime;
+          console.log(result.bandwidthMbs);
+        }else{
+
+        }
+        
         this.callbackOnMessage(result);
     };
 

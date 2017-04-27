@@ -138,7 +138,7 @@
       console.log(result);
     }
 
-    var webSocketDataTransfer = new window.webSocketDataTransfer(testPlan.webSocketUrlIPv4, 100000, webSocketDownloadOnComplete,
+    var webSocketDataTransfer = new window.webSocketDataTransfer(testPlan.webSocketUrlIPv4, 100000, 'download',webSocketDownloadOnComplete,
       webSocketDownloadOnError);
     webSocketDataTransfer.start();
   }
