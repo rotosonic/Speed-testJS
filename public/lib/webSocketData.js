@@ -46,6 +46,7 @@
             this._request.onmessage = this._handleOnMessage.bind(this);
             this._request.onclose = this._handleOnClose.bind(this);
             this._request.onerror = this._handleOnError.bind(this);
+            this._request.binaryType = 'arraybuffer';
         }
     };
     /**
@@ -61,12 +62,14 @@
      */
     webSocketData.prototype._handleOnOpen = function () {
         this.callbackOnOpen(this.id);
+
     };
 
     /**
      * send message for current webSocket
      */
     webSocketData.prototype.sendMessage = function (obj) {
+        this.startTime = Date.now();
         this._request.send(JSON.stringify(obj), {mask: true});
     };
 
@@ -74,7 +77,14 @@
      * webSocket onMessage received Event
      */
     webSocketData.prototype._handleOnMessage = function (event) {
-        this.callbackOnMessage(event);
+        var result={};
+        result.id = this.id
+        result.event = event;
+        result.chunckLoaded = (event.data.byteLength * 8) / 1000000;
+        result.totalTime = (Date.now() - this.startTime)/1000;
+        result.bandwidthMbs = result.chunckLoaded/result.totalTime;
+        console.log(result.bandwidthMbs);
+        this.callbackOnMessage(result);
     };
 
     /**

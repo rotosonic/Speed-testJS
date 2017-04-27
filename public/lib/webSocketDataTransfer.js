@@ -32,8 +32,8 @@
     this.transferSize = 100000;
     this.callbackOnMessage = callbackOnMessage;
     this.callbackOnError = callbackOnError;
-    this.concurrentRuns = 3;
-    this.testLength = 12000;
+    this.concurrentRuns = 4;
+    this.testLength = 10000;
     //unique id or test
     this._testIndex = 1;
     //array for packet loss;
@@ -49,7 +49,7 @@
     //start time of test suite
     this.beginTime;
     //time for monitor to calcualte stats
-    this.monitorInterval = 50;
+    this.monitorInterval = 100;
     //results object array
     this.results =[];
     //boolean on whether test  suite is running or not
@@ -91,7 +91,7 @@
    */
   webSocketDataTransfer.prototype.onTestOpen = function (id) {
     //var obj = {'data': this.transferSize, 'flag': 'download', 'id':id, 'size': this.transferSize};
-    console.log('webSocketOpen: ' + id);
+    //console.log('webSocketOpen: ' + id);
     this.sendMessage(id);
   };
 
@@ -108,20 +108,30 @@
    * @return message object
    */
   webSocketDataTransfer.prototype.onMessageComplete = function (result) {
-    //console.log(result);
+    //console.dir(result);
     var event = {};
-    event.sizeMb = (result.data.size * 8) / 1000000;
+/*
+    var str =result.data.byteLength.toString();
+    var id = str.substring(str.length-1, str.length);
+    event.sizeMb = (result.data.byteLength * 8) / 1000000;
     event.timeStamp = Date.now();
     this.results.push(event);
+    */
+    //this.sendMessage(-1);
     // if bufferedAmount === 0 then increase transferSize
-    if(this.webSocketsBufferedAmount===0){
-      this.transferSize = this.transferSize ;
-      this.sendMessage(-1);
-      console.log('additional reqeust: ' + this.transferSize);
+    //console.log('webSocketsBufferedAmount: ' + this.webSocketsBufferedAmount);
+    console.log('totalTime: ' + result.totalTime);
+    //console.log(this.transferSize);
+    if((result.totalTime< 50) && (this.transferSize < 800000)){
+      this.transferSize = this.transferSize + this.transferSize;
+
+      //console.log('additional reqeust: ' + this.transferSize);
     }
     else{
-      console.log('webSocketsBufferedAmount: ' + this.webSocketsBufferedAmount);
+      //console.log('webSocketsBufferedAmount: ' + this.webSocketsBufferedAmount);
     }
+this.sendMessage(result.id);
+    //setTimeout(this.sendMessage(result.id), 250);
 
   };
 
@@ -193,8 +203,8 @@
           }
         }
         if (!isNaN(totalLoaded / this.monitorInterval)) {
-            console.log('BandWidth: ' + (totalLoaded / this.monitorInterval));
-            console.log(' counter: '  + intervalCounter + ' loaded: ' + totalLoaded);
+            //console.log('BandWidth: ' + (totalLoaded / this.monitorInterval));
+            //console.log(' counter: '  + intervalCounter + ' loaded: ' + totalLoaded);
         }
     }
     console.log('timeRemaining: ' + (Date.now() - this.beginTime));

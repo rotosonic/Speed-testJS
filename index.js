@@ -140,8 +140,9 @@ wss.on('connection', function connection(ws) {
     ws.on('message', function incoming(messageObj) {
         var message = JSON.parse(messageObj);
         if (message.flag === 'download'){
-          var buf = new Buffer(message.size);
-          ws.send(buf);
+          var dataBuffer = new Buffer(message.size);
+          ws.send(dataBuffer);
+
 /*
          var request_obj = {
          binary : {
