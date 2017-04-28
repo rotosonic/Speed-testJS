@@ -71,6 +71,9 @@
      */
     webSocketData.prototype.sendMessage = function (obj) {
         this.startTime = Date.now();
+        if(this._request.readyState !== 1){
+          return;
+        }
         if(this.type === 'download'){
           this._request.send(JSON.stringify(obj), {mask: true});
         } else{
@@ -90,13 +93,11 @@
           result.chunckLoaded = (event.data.byteLength * 8) / 1000000;
           result.totalTime = (Date.now() - this.startTime)/1000;
           result.bandwidthMbs = result.chunckLoaded/result.totalTime;
-          console.log('downloadBandwidth: ' + result.bandwidthMbs);
         }else{
           var data = JSON.parse(event.data);
           result.chunckLoaded = (data.uploadBytes * 8) / 1000000;
           result.totalTime = (Date.now() - this.startTime)/1000;
           result.bandwidthMbs = result.chunckLoaded/result.totalTime;
-          console.log('uploadBandwidth: ' + result.bandwidthMbs);
         }
 
         this.callbackOnMessage(result);

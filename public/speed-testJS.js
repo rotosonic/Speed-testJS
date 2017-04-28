@@ -129,22 +129,80 @@
   }
 
   function webSocketDownload(){
+    var currentTest = 'download';
+    option.series[0].data[0].value = 0;
+    option.series[0].data[0].name = 'Testing Download ...';
+    option.series[0].detail.formatter = formatSpeed;
+    option.series[0].detail.show = true;
+    myChart.setOption(option, true);
+
+    function webSocketDownloadOnMessage(result) {
+      option.series[0].data[0].value = result;
+      myChart.setOption(option, true);
+    }
 
     function webSocketDownloadOnComplete(result) {
-      console.log(result);
+      var finalValue = parseFloat(result).toFixed(2);
+      updateValue([currentTest, '-', 'IPv4'].join(''), finalValue);
+      webSocketUpload();
     }
 
     function webSocketDownloadOnError(result) {
-      console.log(result);
+      console.log('webSocketDownloadOnError: ' + result);
+    }
+
+    function webSocketDownloadOnTestProgress(result) {
+      console.log('webSocketDownloadOnTestProgress: ' + result);
     }
     //download
-    //var webSocketDataTransfer = new window.webSocketDataTransfer(testPlan.webSocketUrlIPv4, 100000, 'download',webSocketDownloadOnComplete,
-    //  webSocketDownloadOnError);
-    //upload
-    var webSocketDataTransfer = new window.webSocketDataTransfer(testPlan.webSocketUrlIPv4, 50000, 'upload',webSocketDownloadOnComplete,
-      webSocketDownloadOnError);
+    var webSocketDataTransfer = new window.webSocketDataTransfer(testPlan.webSocketUrlIPv4, 100000, 'download',webSocketDownloadOnMessage,
+      webSocketDownloadOnError, webSocketDownloadOnComplete, webSocketDownloadOnTestProgress);
     webSocketDataTransfer.start();
   }
+
+  function webSocketUpload(){
+    var currentTest = 'upload';
+    option.series[0].data[0].value = 0;
+    option.series[0].data[0].name = 'Testing Upload ...';
+    option.series[0].detail.formatter = formatSpeed;
+    option.series[0].detail.show = true;
+    myChart.setOption(option, true);
+
+    function webSocketUploadOnMessage(result) {
+      option.series[0].data[0].value = result;
+      myChart.setOption(option, true);
+    }
+
+    function webSocketUploadOnComplete(result) {
+      var finalValue = parseFloat(result).toFixed(2);
+      updateValue([currentTest, '-', 'IPv4'].join(''), finalValue);
+      //update dom with final result
+      startTestButton.disabled = false;
+      //update button text to communicate current state of test as In Progress
+      startTestButton.innerHTML = 'Start Test';
+      option.series[0].data[0].value = 0;
+      option.series[0].data[0].name = 'Test Complete';
+      //set accessiblity aria-disabled state.
+      //This will also effect the visual look by corresponding css
+      startTestButton.setAttribute('aria-disabled', false);
+      startTestButton.disabled = false;
+      option.series[0].detail.show = false;
+      myChart.setOption(option, true);
+    }
+
+    function webSocketUploadOnError(result) {
+      //console.log('webSocketUploadOnError: ' + result);
+    }
+
+    function webSocketUploadOnTestProgress(result) {
+      //console.log('webSocketUploadOnTestProgress: ' + result);
+    }
+    //download
+    var webSocketDataTransfer = new window.webSocketDataTransfer(testPlan.webSocketUrlIPv4, 50000, 'upload',webSocketUploadOnMessage,
+      webSocketUploadOnError, webSocketUploadOnComplete, webSocketUploadOnTestProgress);
+    webSocketDataTransfer.start();
+  }
+
 
 
   function hasClass(el, className) {
