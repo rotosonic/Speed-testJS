@@ -91,11 +91,13 @@
         result.id = this.id;
         if (this.type==='download') {
           result.chunckLoaded = (event.data.byteLength * 8) / 1000000;
+          result.endTime = Date.now();
           result.totalTime = (Date.now() - this.startTime)/1000;
           result.bandwidthMbs = result.chunckLoaded/result.totalTime;
         }else{
           var data = JSON.parse(event.data);
           result.chunckLoaded = (data.uploadBytes * 8) / 1000000;
+          result.endTime = Date.now();
           result.totalTime = (Date.now() - this.startTime)/1000;
           result.bandwidthMbs = result.chunckLoaded/result.totalTime;
         }
