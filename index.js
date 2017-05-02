@@ -116,6 +116,7 @@ wss.on('connection', function connection(ws) {
 
         var message = JSON.parse(messageObj);
         if (message.flag === 'download'){
+          console.log(message.size);
           var dataBuffer = new Buffer(message.size);
           ws.send(dataBuffer);
          } else if (message.flag === 'latency') {

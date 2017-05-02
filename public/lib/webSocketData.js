@@ -32,6 +32,7 @@
         this.callbackOnMessage = callbackOnMessage;
         this.callbackOnError = callbackOnError;
         this._request = null;
+        this.messages = 0;
 
     }
 
@@ -71,13 +72,21 @@
      */
     webSocketData.prototype.sendMessage = function (obj) {
         this.startTime = Date.now();
+        //check connection is open
         if(this._request.readyState !== 1){
           return;
         }
-        if(this.type === 'download'){
+    
+        //ping on first request for quick handshake
+        if(this.messages ===0){
+          var obj = {'data': Date.now().toString(), 'flag': 'latency'};
           this._request.send(JSON.stringify(obj), {mask: true});
-        } else{
-          this._request.send(obj, {mask: true});
+        }else{
+          if(this.type === 'download'){
+            this._request.send(JSON.stringify(obj), {mask: true});
+          } else{
+            this._request.send(obj, {mask: true});
+          }
         }
 
     };
@@ -89,6 +98,7 @@
         var result={};
         result.type = this.type;
         result.id = this.id;
+        result.messages = this.messages;
         if (this.type==='download') {
           result.chunckLoaded = (event.data.byteLength * 8) / 1000000;
           result.endTime = Date.now();
@@ -101,7 +111,7 @@
           result.totalTime = (Date.now() - this.startTime)/1000;
           result.bandwidthMbs = result.chunckLoaded/result.totalTime;
         }
-
+        this.messages++;
         this.callbackOnMessage(result);
     };
 
