@@ -51,6 +51,103 @@
   var uploadMovingAverage = 18;
   var uploadUrls = [];
   var uploadMonitorInterval = 200;
+  var isTestStarted = false;
+  var downloadHttpConcurrentProgress;
+  var uploadHttpConcurrentProgress;
+  //stop test is window lost focus
+  var windowLostFocus = function () {
+    if(isTestStarted) {
+      try{
+        alert('Test cancelled. Please note switching browser tabs or minimising browser window will stop page acivity which' +
+                 'will result in an inaccurate bandwidths. Mobile devices which sleep (ie. screen go dark) will also stop page activity. '+
+                  'Please keep the page open active during the speed test for accurate results.');
+
+        //set test value to 0
+        option.series[0].data[0].value = 0;
+        //updat test status to complete
+        option.series[0].data[0].name = 'Test Failed';
+        //set accessiblity aria-disabled state.
+        //This will also effect the visual look by corresponding css
+        startTestButton.setAttribute('aria-disabled', false);
+        //update button text to communicate current state of test as In Progress
+        startTestButton.innerHTML = 'Start Test';
+        //enable start button
+        startTestButton.disabled = false;
+        //hide current test value in chart
+        option.series[0].detail.show = false;
+        //update gauge
+        myChart.setOption(option, true);
+        downloadHttpConcurrentProgress.abortAll();
+        uploadHttpConcurrentProgress.abortAll();
+      }catch(error){
+        console.log(error);
+      }
+    }
+  };
+
+  //code to check if window lost focus
+  // Get Browser-Specifc Prefix
+  function getBrowserPrefix() {
+
+    // Check for the unprefixed property.
+    if ('hidden' in document) {
+        return null;
+    }
+
+    // All the possible prefixes.
+    var browserPrefixes = ['moz', 'ms', 'o', 'webkit'];
+
+    for (var i = 0; i < browserPrefixes.length; i++) {
+        var prefix = browserPrefixes[i] + 'Hidden';
+            if (prefix in document) {
+                return browserPrefixes[i];
+            }
+    }
+
+        // The API is not supported in browser.
+        return null;
+    }
+
+  // Get Browser Specific Hidden Property
+  function hiddenProperty(prefix) {
+    if (prefix) {
+        return prefix + 'Hidden';
+    } else {
+        return 'hidden';
+    }
+  }
+
+  // Get Browser Specific Visibility State
+  function visibilityState(prefix) {
+    if (prefix) {
+        return prefix + 'VisibilityState';
+    } else {
+        return 'visibilityState';
+    }
+  }
+
+  // Get Browser Specific Event
+  function visibilityEvent(prefix) {
+    if (prefix) {
+        return prefix + 'visibilitychange';
+    } else {
+        return 'visibilitychange';
+    }
+  }
+  // Get Browser Prefix
+  var prefix = getBrowserPrefix();
+  var hidden = hiddenProperty(prefix);
+  var visibilityState = visibilityState(prefix);
+  var visibilityEvent = visibilityEvent(prefix);
+
+  document.addEventListener(visibilityEvent, function(event) {
+    if (document[hidden]) {
+        windowLostFocus();
+        }
+    });
+
+
+
 
   function initTest() {
     function addEvent(el, ev, fn) {
@@ -162,6 +259,7 @@
     xhr.onreadystatechange = function () {
       if (xhr.readyState == XMLHttpRequest.DONE) {
         var data = JSON.parse(xhr.responseText);
+        data.hasIPv6 = false;
         testPlan = data;
         if (testPlan.performLatencyRouting) {
           latencyBasedRouting();
@@ -190,7 +288,7 @@
   }
 
   function startTest() {
-
+    isTestStarted = true;
     if (firstRun) {
       firstRun = false;
     } else {
@@ -474,7 +572,7 @@
 
       }
     }
-    var downloadHttpConcurrentProgress = new window.downloadHttpConcurrentProgress(downloadUrls, 'GET', downloadCurrentRuns, downloadTestTimeout, downloadTestLength, downloadMovingAverage, downloadHttpOnComplete, downloadHttpOnProgress,
+     downloadHttpConcurrentProgress = new window.downloadHttpConcurrentProgress(downloadUrls, 'GET', downloadCurrentRuns, downloadTestTimeout, downloadTestLength, downloadMovingAverage, downloadHttpOnComplete, downloadHttpOnProgress,
       downloadHttpOnAbort, downloadHttpOnTimeout, downloadHttpOnError,downloadSize, downloadProgressInterval,downloadMonitorInterval);
 
     downloadHttpConcurrentProgress.initiateTest();
@@ -504,6 +602,7 @@
         startTestButton.disabled = false;
         option.series[0].detail.show = false;
         myChart.setOption(option, true);
+        isTestStarted = false;
       }
 
       updateValue([currentTest, '-', version].join(''), finalValue);
@@ -536,7 +635,7 @@
     }
 
 
-    var uploadHttpConcurrentProgress;
+
     var baseUrl;
     //TODO needs to removed once we know the issues  with ie
     if (navigator.appVersion.indexOf("MSIE") != -1 || navigator.appVersion.indexOf("Trident") != -1 || navigator.appVersion.indexOf("Edge") != -1) {
