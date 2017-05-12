@@ -99,35 +99,37 @@ global.maxDownloadBuffer = 532421875;
 global.maxUploadBuffer = 10000000;
 
 var wss = new WebSocketServer({port: webSocketPort});
-wss.on('connection', function connection(ws) {
-    console.log('client connected');
 
-    ws.on('message', function incoming(messageObj) {
-        var message = JSON.parse(messageObj);
-        /*
-         if (message.flag === 'download'){
-         var img = images[message.data];
-         console.log(img);
-         var request_obj = {
-         JSONimg : {
-         'type' : 'img',
-         'data' : img,
-         },
-         startTIME : new Date().getTime()
-         }
-         console.log("Trying to send using websockets")
-         ws.send(JSON.stringify(request_obj));
-         } else if (message.flag === 'latency'){
-         */
-        if (message.flag === 'latency') {
-            console.log('received: %s', new Date().getTime());
-            ws.send(message.data);
-        } else if (message.flag === 'upload') {
-            var uploadtime = {'data': Date.now().toString()};
-            ws.send(JSON.stringify(uploadtime.data));
-        } else {
-            console.log("error message");
-        }
+  wss.on('connection', function connection(ws) {
+      console.log('client connected');
 
-    });
-});
+      ws.on('message', function incoming(messageObj) {
+        //check if message is json.. if not then it is an upload test
+        try {
+          JSON.parse(messageObj);
+          } catch (e) {
+              var result = {};
+              result.endTime  = Date.now();
+              result.uploadBytes = messageObj.byteLength;
+              ws.send(JSON.stringify(result));
+              return;
+          }
+
+          var message = JSON.parse(messageObj);
+          if (message.flag === 'download'){
+            var dataBuffer = new Buffer(message.size);
+            ws.send(dataBuffer);
+           } else if (message.flag === 'latency') {
+              console.log('received: %s', new Date().getTime());
+              ws.send(message.data);
+          } else if (message.flag === 'upload') {
+              var uploadtime = {'data': Date.now().toString()};
+              var dataBuffer = new Buffer(message.data);
+                console.log(dataBuffer.byteLength);
+              ws.send(JSON.stringify(uploadtime.data));
+          } else {
+
+          }
+
+      });
+  });

@@ -37,7 +37,7 @@
     var downloadCurrentRuns = 32;
     var downloadTestTimeout = 12000;
     var downloadTestLength = 12000;
-    var downloadMovingAverage = 18;
+    var downloadMovingAverage = 32;
     var downloadProgressInterval = 25;
     var urls = [];
     var ports = [5020, 5021, 5022, 5023, 5024, 5025];
@@ -151,9 +151,9 @@
             if (xhr.readyState == XMLHttpRequest.DONE) {
                 var data = JSON.parse(xhr.responseText);
                 testPlan = data;
-                testPlan.baseUrlIPv4='69.252.86.194';
-                testPlan.baseUrlIPv4NoPort='69.252.86.194';
-                testPlan.hasIPv6 = false;
+                //testPlan.baseUrlIPv4='69.252.86.194';
+                //testPlan.baseUrlIPv4NoPort='69.252.86.194';
+                //testPlan.hasIPv6 = false;
                 if (testPlan.performLatencyRouting) {
                     latencyBasedRouting();
                 }
