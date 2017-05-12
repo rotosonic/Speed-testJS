@@ -29,14 +29,14 @@
   function webSocketDataTransfer(url, transferSize, type, callbackOnMessage, callbackOnError,
       callbackOnComplete, callbackOnTestProgress) {
     //this.url = 'ws://69.241.66.214:5003';
-    this.url = 'ws://127.0.0.1:8081';
+    this.url = 'ws://69.241.66.214:5003';
     this.transferSize = transferSize;
     this.type = type;
     this.clientCallbackOnMessage = callbackOnMessage;
     this.clientCallbackOnError = callbackOnError;
     this.clientCallbackOnComplete = callbackOnComplete;
     this.clientCallbackOnTestProgress = callbackOnTestProgress;
-    this.concurrentRuns = 32;
+    this.concurrentRuns = 4;
     this.testLength = 10000;
     //unique id or test
     this._testIndex = 1;
@@ -77,7 +77,7 @@
     //results object array
     this.resultsMb =[];
     //number of requests per webSocket
-    this.requestPerWebSocket = 1;
+    this.numberOfRequests = 1;
   }
 
   /**
@@ -140,14 +140,26 @@
       this.clientCallbackOnMessage(bandwidthMbs);
       this.resultsMb.push(bandwidthMbs);
       this.results.push(result);
-      //console.log(bandwidthMbs);
-      var maxConnections = 32;
-      if(result.id<10){
-        this.transferSize = 125000;
-      }else if(result.id > 10 && result.id< 20){
-        this.transferSize = 150000;
-      }else{
+      console.log('totalTime: ' + result.totalTime);
+      var maxConnections = 16;
+      if(result.totalTime > .1 && result.totalTime < .3){
+        this.transferSize = 751095;
+        if(this.webSockets.length<= maxConnections){
+          this.createSocket(this.webSockets.length, this.type);
+          this.numberOfRequests = 1;
+        }
+      }else if(result.totalTime > .3 && result.totalTime < .4){
+        this.transferSize = 200000;
+        if(this.webSockets.length<= maxConnections){
+          this.createSocket(this.webSockets.length, this.type);
+          this.numberOfRequests = 2;
+        }
+      }else if(result.totalTime > .4 && result.totalTime < .5){
         this.transferSize = 300000;
+        if(this.webSockets.length<= maxConnections){
+          this.createSocket(this.webSockets.length, this.type);
+          this.numberOfRequests = 3;
+        }
       }
       //console.log('totalTime: ' + result.totalTime);
       /*
@@ -193,7 +205,7 @@
     if(this._running){
       if(this.type === 'download'){
         var obj = {'flag': 'download', 'id':id, 'size': this.transferSize};
-        for(var d=0; d<numberOfRequests;d++){
+        for(var d=0; d<this.numberOfRequests;d++){
           this.webSockets[id].sendMessage(obj);
         }
       }else{

@@ -152,10 +152,10 @@
     }
 
     function webSocketDownloadOnTestProgress(result) {
-      console.log('webSocketDownloadOnTestProgress: ' + result);
+      //console.log('webSocketDownloadOnTestProgress: ' + result);
     }
     //download
-    var webSocketDataTransfer = new window.webSocketDataTransfer(testPlan.webSocketUrlIPv4, 100000, 'download',webSocketDownloadOnMessage,
+    var webSocketDataTransfer = new window.webSocketDataTransfer(testPlan.webSocketUrlIPv4, 10000, 'download',webSocketDownloadOnMessage,
       webSocketDownloadOnError, webSocketDownloadOnComplete, webSocketDownloadOnTestProgress);
     webSocketDataTransfer.start();
   }
