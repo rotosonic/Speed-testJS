@@ -144,7 +144,7 @@
     function webSocketDownloadOnComplete(result) {
       var finalValue = parseFloat(result).toFixed(2);
       updateValue([currentTest, '-', 'IPv4'].join(''), finalValue);
-      webSocketUpload();
+      //webSocketUpload();
     }
 
     function webSocketDownloadOnError(result) {
@@ -240,7 +240,6 @@
       if (xhr.readyState == XMLHttpRequest.DONE) {
         var data = JSON.parse(xhr.responseText);
         testPlan = data;
-        console.dir(testPlan);
         if (testPlan.performLatencyRouting) {
           latencyBasedRouting();
         }
