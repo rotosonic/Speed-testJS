@@ -28,16 +28,16 @@
    */
   function webSocketDataTransfer(url, transferSize, type, callbackOnMessage, callbackOnError,
       callbackOnComplete, callbackOnTestProgress) {
-    //this.url = 'ws://69.241.66.214:5003';
-    this.url = 'ws://127.0.0.1:8081';
+    this.url = 'ws://96.118.56.108:5003';
+    //this.url = 'ws://127.0.0.1:8081';
     this.transferSize = transferSize;
     this.type = type;
     this.clientCallbackOnMessage = callbackOnMessage;
     this.clientCallbackOnError = callbackOnError;
     this.clientCallbackOnComplete = callbackOnComplete;
     this.clientCallbackOnTestProgress = callbackOnTestProgress;
-    this.concurrentRuns = 4;
-    this.testLength = 10000;
+    this.concurrentRuns = 10;
+    this.testLength = 15000;
     //unique id or test
     this._testIndex = 1;
     //array for packet loss;
@@ -142,25 +142,6 @@
       this.results.push(result);
       console.log(bandwidthMbs);
       console.log('totalTime: ' + result.totalTime);
-      if(bandwidthMbs > 25 && bandwidthMbs< 50){
-        this.transferSize = 125000;
-        this.createSocket(this.webSockets.length, this.type);
-        numberOfRequests = 2;
-      }else if(bandwidthMbs > 50 && bandwidthMbs< 100){
-        this.transferSize = 150000;
-        this.createSocket(this.webSockets.length, this.type);
-        numberOfRequests = 3;
-      }else if(bandwidthMbs > 100 && bandwidthMbs< 200){
-        this.transferSize = 175000;
-        this.createSocket(this.webSockets.length, this.type);
-        numberOfRequests = 4;
-      }else if(bandwidthMbs > 200){
-        this.transferSize = 200000;
-        this.createSocket(this.webSockets.length, this.type);
-        numberOfRequests = 4;
-      }
-
-
     }
 
     this.sendMessage(result.id,numberOfRequests);
