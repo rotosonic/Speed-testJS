@@ -105,7 +105,7 @@
           result.totalTime = (Date.now() - this.startTime)/1000;
           result.bandwidthMbs = result.chunckLoaded/result.totalTime;
           if(result.chunckLoaded){
-            webSocketDetailDownload = webSocketDetailDownload +  this.id +','+ this.startTime+','+ result.endTime+','+ result.totalTime+','+ result.chunckLoaded+','+ result.bandwidthMbs +  '\n ';
+            webSocketDetailDownload = webSocketDetailDownload +  this.id +','+ this.startTime+','+ result.endTime+','+ result.totalTime+','+ result.chunckLoaded+','+ parseFloat(result.bandwidthMbs).toFixed(2)  +  '\n ';
           }
           //console.log('download',this.id, this.startTime, result.endTime, result.totalTime/1000, result.chunckLoaded, result.bandwidthMbs + '%0D%0A ');
         }else{
@@ -115,7 +115,7 @@
           result.totalTime = (Date.now() - this.startTime)/1000;
           result.bandwidthMbs = result.chunckLoaded/result.totalTime;
           if(result.chunckLoaded){
-            webSocketDetailUpload = webSocketDetailUpload +  this.id +','+ this.startTime+','+ result.endTime+','+ result.totalTime+','+ result.chunckLoaded+','+ result.bandwidthMbs +  '\n ';
+            webSocketDetailUpload = webSocketDetailUpload +  this.id +','+ this.startTime+','+ result.endTime+','+ result.totalTime+','+ result.chunckLoaded+','+ parseFloat(result.bandwidthMbs).toFixed(2) +  '\n ';
           }
         }
         this.messages++;

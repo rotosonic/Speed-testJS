@@ -26,6 +26,45 @@
 </head>
 
 <body>
+  <div>
+  <table >
+    <tr>
+      <td>
+        DetailDownload
+      </td>
+      <td>
+        TotalDownload
+      </td>
+    </tr>
+      <tr>
+        <td>
+          <textarea id ="webSocketDetailDownload"  rows="4" cols="50"> </textarea>
+        </td>
+        <td>
+  <textarea id ="webSocketTotalDownload"  rows="4" cols="50"> </textarea>
+        </td>
+  </tr>
+  </table>
+  <br>
+  <table>
+    <tr>
+      <td>
+        DetailUpload
+      </td>
+      <td>
+        TotalUpload
+      </td>
+    </tr>
+    <tr>
+          <td>
+  <textarea id ="webSocketDetailUpload"  rows="4" cols="50"> </textarea>
+          </td>
+          <td>
+  <textarea id ="webSocketTotalUpload"  rows="4" cols="50"> </textarea>
+          </td>
+      </tr>
+  </table>
+</div>
 <div class="container speed-test">
     <div class="row top">
         <h1 class="logo"></h1>
@@ -70,7 +109,9 @@
             </div>
         </div>
     </div>
-</div>
+</div><br>
+
+
 <script>
 var webSocketDetailDownload='';
 var webSocketTotalDownload='';

@@ -136,9 +136,9 @@
       this.totalBytes += result.chunckLoaded;
       var bandwidthMbs = (this.totalBytes)/((Date.now() - this.beginTime)/1000);
       if(event.type==='download'){
-        webSocketTotalDownload = webSocketTotalDownload + (Date.now() - this.beginTime)+','+ this.totalBytes+','+ bandwidthMbs +  '\n ';
+        webSocketTotalDownload = webSocketTotalDownload + (Date.now() - this.beginTime)+','+ this.totalBytes+','+ parseFloat(bandwidthMbs).toFixed(2) +  '\n ';
       }else{
-        webSocketTotalUpload = webSocketTotalUpload + (Date.now() - this.beginTime)+','+ this.totalBytes+','+ bandwidthMbs +  '\n ';
+        webSocketTotalUpload = webSocketTotalUpload + (Date.now() - this.beginTime)+','+ this.totalBytes+','+ parseFloat(bandwidthMbs).toFixed(2) +  '\n ';
 
       }
       this.clientCallbackOnMessage(bandwidthMbs);
@@ -193,16 +193,15 @@
       var avg = sum / finalArray.length;
       this.clientCallbackOnComplete(avg);
         if(this.type === 'download'){
-            console.log('downloadDetail');
-            console.log(webSocketDetailDownload);
-            console.log('downloadTotal');
-            console.log(webSocketTotalDownload);
+
+            document.getElementById('webSocketDetailDownload').value = webSocketDetailDownload;
+            document.getElementById('webSocketTotalDownload').value = webSocketTotalDownload;
+            //console.log('downloadTotal');
+            //console.log(webSocketTotalDownload);
 
         }else{
-          console.log('uploadDetail');
-          console.log(webSocketDetailUpload);
-          console.log('uploadTotal');
-          console.log(webSocketTotalUpload);
+          document.getElementById('webSocketDetailUpload').value = webSocketDetailUpload;
+          document.getElementById('webSocketTotalUpload').value = webSocketTotalUpload;
 
         }
     }
