@@ -37,7 +37,7 @@
     this.clientCallbackOnComplete = callbackOnComplete;
     this.clientCallbackOnTestProgress = callbackOnTestProgress;
     this.concurrentRuns = 10;
-    this.testLength = 15000;
+    this.testLength = 12000;
     //unique id or test
     this._testIndex = 1;
     //array for packet loss;
@@ -65,8 +65,6 @@
     //total bytes of the test
     this.totalBytes = 0;
     //total messages
-    this.messages = 0;
-    //firstLevelIncrease
     this.messages = 0;
     //boolean for process adding connections
     this.addInTestSockets25 = false;
@@ -137,11 +135,15 @@
       event.type = result.type;
       this.totalBytes += result.chunckLoaded;
       var bandwidthMbs = (this.totalBytes)/((Date.now() - this.beginTime)/1000);
+      if(event.type==='download'){
+        webSocketTotalDownload = webSocketTotalDownload + (Date.now() - this.beginTime)+','+ this.totalBytes+','+ bandwidthMbs +  '\n ';
+      }else{
+        webSocketTotalUpload = webSocketTotalUpload + (Date.now() - this.beginTime)+','+ this.totalBytes+','+ bandwidthMbs +  '\n ';
+
+      }
       this.clientCallbackOnMessage(bandwidthMbs);
       this.resultsMb.push(bandwidthMbs);
       this.results.push(result);
-      console.log(bandwidthMbs);
-      console.log('totalTime: ' + result.totalTime);
     }
 
     this.sendMessage(result.id,numberOfRequests);
@@ -185,10 +187,24 @@
       this._running=false;
       clearInterval(this.interval);
       self.close();
-      var finalArray = this.resultsMb.slice(this.resultsMb.length/90);
+
+      var finalArray = this.resultsMb.slice(Math.round(this.resultsMb.length * .75),this.resultsMb.length-1);
       var sum = finalArray.reduce(function(a, b) { return a + b; });
       var avg = sum / finalArray.length;
       this.clientCallbackOnComplete(avg);
+        if(this.type === 'download'){
+            console.log('downloadDetail');
+            console.log(webSocketDetailDownload);
+            console.log('downloadTotal');
+            console.log(webSocketTotalDownload);
+
+        }else{
+          console.log('uploadDetail');
+          console.log(webSocketDetailUpload);
+          console.log('uploadTotal');
+          console.log(webSocketTotalUpload);
+
+        }
     }
   };
 
@@ -208,6 +224,21 @@
     for (var i = 0; i < this.webSockets.length; i++) {
         this.webSockets[i].close();
     }
+  };
+
+  /**
+   * reset test variables star test
+   */
+  webSocketDataTransfer.prototype.initiateTest = function(){
+    this.packetLossArray.length=0;
+    this.resultsArray.length=0;
+    this.resultsTimeArray.length=0;
+    this.results.length=0;
+    this.webSockets.length=0;
+    this.messages = 0;
+    this.resultsMb.length=0;
+    this.requestPerWebSocket = 1;
+    this.start();
   };
   window.webSocketDataTransfer = webSocketDataTransfer;
 

@@ -76,7 +76,7 @@
         if(this._request.readyState !== 1){
           return;
         }
-    
+
         //ping on first request for quick handshake
         if(this.messages ===0){
           var obj = {'data': Date.now().toString(), 'flag': 'latency'};
@@ -104,12 +104,19 @@
           result.endTime = Date.now();
           result.totalTime = (Date.now() - this.startTime)/1000;
           result.bandwidthMbs = result.chunckLoaded/result.totalTime;
+          if(result.chunckLoaded){
+            webSocketDetailDownload = webSocketDetailDownload +  this.id +','+ this.startTime+','+ result.endTime+','+ result.totalTime+','+ result.chunckLoaded+','+ result.bandwidthMbs +  '\n ';
+          }
+          //console.log('download',this.id, this.startTime, result.endTime, result.totalTime/1000, result.chunckLoaded, result.bandwidthMbs + '%0D%0A ');
         }else{
           var data = JSON.parse(event.data);
           result.chunckLoaded = (data.uploadBytes * 8) / 1000000;
           result.endTime = Date.now();
           result.totalTime = (Date.now() - this.startTime)/1000;
           result.bandwidthMbs = result.chunckLoaded/result.totalTime;
+          if(result.chunckLoaded){
+            webSocketDetailUpload = webSocketDetailUpload +  this.id +','+ this.startTime+','+ result.endTime+','+ result.totalTime+','+ result.chunckLoaded+','+ result.bandwidthMbs +  '\n ';
+          }
         }
         this.messages++;
         this.callbackOnMessage(result);
