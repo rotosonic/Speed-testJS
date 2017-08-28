@@ -68,19 +68,43 @@ function completeRequest(message, callback){
  // Show a connected message when the WebSocket is opened.
  socket.onopen = function(event) {
    clearInterval(interval);
-   var obj = {'flag': 'download', 'id':message.id, 'size': message.transferSize};
+   if(message.type === 'download'){
+     var obj = {'flag': 'download', 'id':message.id, 'size': message.transferSize};
+     socket.send(JSON.stringify(obj), {mask: true});
+   } else{
+     var uploadData = new Uint8Array(message.transferSize);
+     for (var i = 0; i < uploadData.length; i++) {
+        uploadData[i] = 32 + Math.random() * 95;
+      }
+     var obj = {'data': uploadData, 'flag': 'upload', 'id':message.id, 'size': message.transferSize};
+     socket.send(obj, {mask: true});
+   }
    startWebSocketTransfer = Date.now();
-   socket.send(JSON.stringify(obj), {mask: true});
+
  };
  // Handle messages sent by the server.
  socket.onmessage = function(event) {
    var result={};
-   result.id = message.id;
-   result.chunckLoaded = (event.data.size * 8) / 1000000;
-   result.endTime = Date.now();
-   result.totalTime = (Date.now() - startWebSocketTransfer)/1000;
-   result.bandwidthMbs = result.chunckLoaded/result.totalTime;
-   callback(result);
+   result.type = message.type;
+     if(message.type === 'download'){
+     result.id = message.id;
+     result.chunckLoaded = (event.data.size * 8) / 1000000;
+     result.endTime = Date.now();
+     result.totalTime = (Date.now() - startWebSocketTransfer)/1000;
+     result.bandwidthMbs = result.chunckLoaded/result.totalTime;
+   } else {
+     var data = JSON.parse(event.data);
+     console.dir(data.endTime);
+     result.id = message.id;
+     result.chunckLoaded = (message.transferSize * 8) / 1000000;
+     result.endTime = data.endTime;
+     result.totalTime = (Date.now() - data.endTime)/1000;
+     result.bandwidthMbs = result.chunckLoaded/result.totalTime;
+   }
+   result.message = message;
+   if(result.chunckLoaded){
+     callback(result);
+   }
  };
 
  // Show a disconnected message when the WebSocket is closed.

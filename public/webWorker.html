@@ -5,29 +5,82 @@
   <body>
     <h1>webWorker </h1>
 <script>
+var workerQueue = [];
+var totalBytes = [];
+var startTime;
+var interval;
+
+function onError(e) {
+    var error = [
+      'ERROR: Line ', e.lineno, ' in ', e.filename, ': ', e.message
+    ].join('');
+  }
+
+
+  function monitor(){
+
+    if((Date.now() - startTime)<10000){
+    }
+    else{
+      clearInterval(interval);
+      for(var i=0;i<workerQueue.length-1;i++){
+        workerQueue[i].terminate();
+      }
+    }
+
+  }
+
 
   function workerResponse(event){
-    console.log('workerResponse');
-    console.log(event.data);
+    totalBytes += event.data.chunckLoaded;
+    console.log(totalBytes);
+    console.log((Date.now() - startTime)/1000);
+    var bandwidthMbs = (totalBytes)/((Date.now() - startTime)/1000);
+    console.log(bandwidthMbs);
+    workerQueue[event.data.id-1].postMessage(event.data.message);
   }
 
 function webWorkerTest(){
+ for(var i=0;i<10;i++){
+   var workerName = 'worker'+i;
+   workerName = new Worker('lib/workerWebSocket.js');
+   workerName.addEventListener('message', workerResponse);
+   var message = {};
+   message.url = 'ws://96.118.56.108:5003';
+   message.transferSize = 500000;
+   message.id = i+1;
+   message.type = 'download';
+   workerName.postMessage(message);
+   workerQueue.push(workerName);
+   //workerName.addEventListener('error', onError);
+ }
 
 }
+startTime = Date.now();
+webWorkerTest();
+interval = setInterval(function () {
+  monitor();
+}, 250);
 
+
+function test(){
   var worker1 = new Worker('lib/workerWebSocket.js');
   var message = {};
   message.url = 'ws://96.118.56.108:5003';
   message.transferSize = 500000;
   message.id = 1;
+  message.type = 'download';
   worker1.postMessage(message);
   worker1.addEventListener('message', workerResponse);
 
-var worker2 = new Worker('lib/workerWebSocket.js');
-message.id = 2;
-worker2.postMessage(message);
-worker2.addEventListener('message', workerResponse);
-
+  var worker2 = new Worker('lib/workerWebSocket.js');
+  message.url = 'ws://96.118.56.108:5003';
+  message.transferSize = 130000;
+  message.id = 2;
+  message.type = 'upload';
+  worker2.postMessage(message);
+  worker2.addEventListener('message', workerResponse);
+}
 
 
 
