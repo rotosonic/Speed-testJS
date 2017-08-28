@@ -10,13 +10,18 @@
     console.log('workerResponse');
     console.log(event.data);
   }
-  var worker = new Worker('lib/workerWebSocket.js');
+
+function webWorkerTest(){
+
+}
+
+  var worker1 = new Worker('lib/workerWebSocket.js');
   var message = {};
   message.url = 'ws://96.118.56.108:5003';
-  message.transferSize = 1000;
+  message.transferSize = 500000;
   message.id = 1;
-  worker.postMessage(message);
-  worker.addEventListener('message', workerResponse);
+  worker1.postMessage(message);
+  worker1.addEventListener('message', workerResponse);
 
 var worker2 = new Worker('lib/workerWebSocket.js');
 message.id = 2;

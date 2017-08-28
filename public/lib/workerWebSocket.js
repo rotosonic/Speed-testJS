@@ -7,8 +7,9 @@ var CLOSING =	2;	//The connection is in the process of closing.
 var CLOSED = 3;	//The connection is closed or couldn't be opened.
 //start of WebSocket
 var startWebSocket;
-//start of WebSocket transferSize
+//start of WebSocket data transferSize
 var startWebSocketTransfer;
+//interval for webSocket status
 var interval;
 
 /**
@@ -20,11 +21,6 @@ self.addEventListener('message', function(e) {
   			self.postMessage(data);
   		}
 completeRequest(e.data,requestComplete);
-var data = {};
-data.bandwidth = 100;
-data.dataTransfered = 100;
-data.id = e.data.id;
-
 
 });
 
@@ -32,7 +28,6 @@ data.id = e.data.id;
 * check if webSocket is open
 */
 function checkWebSocketStatus(){
-  console.log(Date.now() - startWebSocket);
   if(socket.readyStatus === OPEN){
     clearInterval(interval);
   }else{
@@ -72,14 +67,20 @@ function completeRequest(message, callback){
 
  // Show a connected message when the WebSocket is opened.
  socket.onopen = function(event) {
-   console.log('onOpen');
+   clearInterval(interval);
+   var obj = {'flag': 'download', 'id':message.id, 'size': message.transferSize};
+   startWebSocketTransfer = Date.now();
    socket.send(JSON.stringify(obj), {mask: true});
-   console.log(event);
  };
  // Handle messages sent by the server.
  socket.onmessage = function(event) {
-   console.log('onMessage');
-   console.log(event);
+   var result={};
+   result.id = message.id;
+   result.chunckLoaded = (event.data.size * 8) / 1000000;
+   result.endTime = Date.now();
+   result.totalTime = (Date.now() - startWebSocketTransfer)/1000;
+   result.bandwidthMbs = result.chunckLoaded/result.totalTime;
+   callback(result);
  };
 
  // Show a disconnected message when the WebSocket is closed.
