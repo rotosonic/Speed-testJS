@@ -88,15 +88,14 @@ function completeRequest(message, callback){
    result.type = message.type;
      if(message.type === 'download'){
      result.id = message.id;
-     result.chunckLoaded = (event.data.size * 8) / 1000000;
+     result.chunckLoaded = (message.transferSize) / 1000000;
      result.endTime = Date.now();
      result.totalTime = (Date.now() - startWebSocketTransfer)/1000;
      result.bandwidthMbs = result.chunckLoaded/result.totalTime;
    } else {
      var data = JSON.parse(event.data);
-     console.dir(data.endTime);
      result.id = message.id;
-     result.chunckLoaded = (message.transferSize * 8) / 1000000;
+     result.chunckLoaded = (message.transferSize) / 1000000;
      result.endTime = data.endTime;
      result.totalTime = (Date.now() - data.endTime)/1000;
      result.bandwidthMbs = result.chunckLoaded/result.totalTime;

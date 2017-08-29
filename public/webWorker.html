@@ -6,7 +6,7 @@
     <h1>webWorker </h1>
 <script>
 var workerQueue = [];
-var totalBytes = [];
+var totalBytes = 0;
 var startTime;
 var interval;
 
@@ -18,8 +18,12 @@ function onError(e) {
 
 
   function monitor(){
-
+    console.log(Date.now() - startTime);
+    console.log((Date.now() - startTime)/1000);
     if((Date.now() - startTime)<10000){
+      var bandwidthMbs = (totalBytes)/((Date.now() - startTime)/1000);
+      console.log(totalBytes);
+      console.log(bandwidthMbs);
     }
     else{
       clearInterval(interval);
@@ -32,11 +36,7 @@ function onError(e) {
 
 
   function workerResponse(event){
-    totalBytes += event.data.chunckLoaded;
-    console.log(totalBytes);
-    console.log((Date.now() - startTime)/1000);
-    var bandwidthMbs = (totalBytes)/((Date.now() - startTime)/1000);
-    console.log(bandwidthMbs);
+    totalBytes = totalBytes + parseFloat(event.data.chunckLoaded);
     workerQueue[event.data.id-1].postMessage(event.data.message);
   }
 
@@ -46,7 +46,8 @@ function webWorkerTest(){
    workerName = new Worker('lib/workerWebSocket.js');
    workerName.addEventListener('message', workerResponse);
    var message = {};
-   message.url = 'ws://96.118.56.108:5003';
+   //message.url = 'ws://96.118.56.108:5003';
+   message.url = 'ws://127.0.0.1:8081';
    message.transferSize = 500000;
    message.id = i+1;
    message.type = 'download';
