@@ -50,7 +50,7 @@ function checkWebSocketStatus(){
 */
 function completeRequest(message, callback){
   //create webSocket connection if none exits
-  if(!socket){
+  if((!socket)&&(socket !== 'undefined')){
     socket = new WebSocket(message.url);
     startWebSocket = Date.now();
     //check status
@@ -58,6 +58,19 @@ function completeRequest(message, callback){
       checkWebSocketStatus(callback);
     }, 500);
 
+  }else{
+    if(message.type === 'download'){
+      var obj = {'flag': 'download', 'id':message.id, 'size': message.transferSize};
+      socket.send(JSON.stringify(obj), {mask: true});
+    } else{
+      var uploadData = new Uint8Array(message.transferSize);
+      for (var i = 0; i < uploadData.length; i++) {
+         uploadData[i] = 32 + Math.random() * 95;
+       }
+      var obj = {'data': uploadData, 'flag': 'upload', 'id':message.id, 'size': message.transferSize};
+      socket.send(obj, {mask: true});
+    }
+    startWebSocketTransfer = Date.now();
   }
 
  // Handle any errors that occur.
@@ -108,7 +121,7 @@ function completeRequest(message, callback){
 
  // Show a disconnected message when the WebSocket is closed.
  socket.onclose = function(event) {
-   console.log('onClose');
+
    console.log(event);
  };
 }

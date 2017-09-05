@@ -18,16 +18,16 @@ function onError(e) {
 
 
   function monitor(){
-    console.log(Date.now() - startTime);
-    console.log((Date.now() - startTime)/1000);
+    //console.log(Date.now() - startTime);
+    //console.log((Date.now() - startTime)/1000);
     if((Date.now() - startTime)<10000){
       var bandwidthMbs = (totalBytes)/((Date.now() - startTime)/1000);
-      console.log(totalBytes);
+      //console.log(totalBytes);
       console.log(bandwidthMbs);
     }
     else{
       clearInterval(interval);
-      for(var i=0;i<workerQueue.length-1;i++){
+      for(var i=0;i<workerQueue.length;i++){
         workerQueue[i].terminate();
       }
     }
@@ -37,17 +37,18 @@ function onError(e) {
 
   function workerResponse(event){
     totalBytes = totalBytes + parseFloat(event.data.chunckLoaded);
+    //console.log(event.data.id + '  ' + event.data.bandwidthMbs);
     workerQueue[event.data.id-1].postMessage(event.data.message);
   }
 
 function webWorkerTest(){
- for(var i=0;i<10;i++){
+ for(var i=0;i<5;i++){
    var workerName = 'worker'+i;
    workerName = new Worker('lib/workerWebSocket.js');
    workerName.addEventListener('message', workerResponse);
    var message = {};
    //message.url = 'ws://96.118.56.108:5003';
-   message.url = 'ws://127.0.0.1:8081';
+   message.url = 'ws://96.118.56.108:5003';
    message.transferSize = 500000;
    message.id = i+1;
    message.type = 'download';
