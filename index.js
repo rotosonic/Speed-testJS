@@ -33,8 +33,8 @@ var downloadData = require('./modules/downloadData');
 domain.setIpAddresses();
 
 //variables
-global.webPort = +process.env.WEB_PORT || 8080;
-global.webSocketPort = global.webPort + 1;
+global.webPort = 80;
+global.webSocketPort = 5003;
 
 //export modules
 module.exports.statisticalCalculator = require('./modules/statisticalCalculator');
@@ -117,7 +117,12 @@ wss.on('connection', function connection(ws) {
         var message = JSON.parse(messageObj);
         if (message.flag === 'download'){
           console.log(message.size);
+          //var dataBuffer = new Buffer(message.size);
+          console.log('messageSize' + message.size);
           var dataBuffer = new Buffer(message.size);
+          for (var j = 0; j < dataBuffer.length; j++) {
+            dataBuffer[j] = 32 + Math.random() * 95;
+          }
           ws.send(dataBuffer);
          } else if (message.flag === 'latency') {
             console.log('received: %s', new Date().getTime());

@@ -28,15 +28,21 @@
    */
   function webSocketDataTransfer(url, transferSize, type, callbackOnMessage, callbackOnError,
       callbackOnComplete, callbackOnTestProgress) {
-    this.url = 'ws://96.118.56.108:5003';
-    //this.url = 'ws://127.0.0.1:8081';
+    //this.url = 'ws://96.118.56.108:5003';
+    this.url = 'ws://192.168.200.1:5003';
+    console.log(this.url);
     this.transferSize = transferSize;
     this.type = type;
     this.clientCallbackOnMessage = callbackOnMessage;
     this.clientCallbackOnError = callbackOnError;
     this.clientCallbackOnComplete = callbackOnComplete;
     this.clientCallbackOnTestProgress = callbackOnTestProgress;
+    if(type==='upload'){
     this.concurrentRuns = 10;
+  }
+  else{
+    this.concurrentRuns = 20;
+  }
     this.testLength = 12000;
     //unique id or test
     this._testIndex = 1;
@@ -145,7 +151,9 @@
       this.resultsMb.push(bandwidthMbs);
       this.results.push(result);
     }
-
+if(result.messages>25){
+  //this.numberOfRequests=4;
+}
     this.sendMessage(result.id,numberOfRequests);
 
 
