@@ -21,7 +21,7 @@ var path = require('path');
 var stream = require('stream');
 var app = express();
 var bodyParser = require('body-parser');
-var WebSocketServer = require('ws').Server;
+//var WebSocketServer = require('ws').Server;
 var domain = require('./modules/domain');
 var validateIP = require('validate-ip-node');
 var os = require('os');
@@ -98,6 +98,18 @@ app.listen(5025);
 global.maxDownloadBuffer = 532421875;
 global.maxUploadBuffer = 10000000;
 
+var server = require('http').createServer(app);
+var io = require('socket.io')(server);
+//Whenever someone connects this gets executed
+io.on('connection', function(socket) {
+   console.log('A user connected');
+
+   //Whenever someone disconnects this piece of code executed
+   socket.on('disconnect', function () {
+      console.log('A user disconnected');
+   });
+});
+/*
 var wss = new WebSocketServer({perMessageDeflate: false,port: webSocketPort});
 wss.on('connection', function connection(ws) {
     console.log('client connected');
@@ -138,3 +150,4 @@ wss.on('connection', function connection(ws) {
 
     });
 });
+*/

@@ -22,7 +22,7 @@
   window.onload = function () {
     void (oldOnload instanceof Function && oldOnload());
     //init for test
-    initTest();
+    //initTest();
   };
 
   var testRunner = [];
