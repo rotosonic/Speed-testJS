@@ -28,8 +28,8 @@
    */
   function webSocketDataTransfer(url, transferSize, type, callbackOnMessage, callbackOnError,
       callbackOnComplete, callbackOnTestProgress) {
-    //this.url = 'ws://96.118.56.108:5003';
-    this.url = 'ws://192.168.200.1:5003';
+    this.url = 'ws://96.118.56.108:5003';
+    //this.url = 'ws://192.168.200.1:5003';
     console.log(this.url);
     this.transferSize = transferSize;
     this.type = type;
