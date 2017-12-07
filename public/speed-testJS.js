@@ -156,7 +156,17 @@
       //console.log('webSocketDownloadOnTestProgress: ' + result);
     }
     //download
-    var webSocketDataTransfer = new window.webSocketDataTransfer(testPlan.webSocketUrlIPv4, 750000, 'download',webSocketDownloadOnMessage,
+    downloadUrls.length=0;
+    var version = 'IPv4';
+    var baseUrl = (version === 'IPv6') ? testPlan.baseUrlIPv6NoPort : testPlan.baseUrlIPv4NoPort;
+    for (var i = 0; i < ports.length; i++) {
+      for(var b= 0; b <6; b++ )
+      {
+        downloadUrls.push('ws://' + testPlan.baseUrlIPv4NoPort + ':' + ports[i]);
+      }
+    }
+
+    var webSocketDataTransfer = new window.webSocketDataTransfer(downloadUrls, 500000, 'download',webSocketDownloadOnMessage,
       webSocketDownloadOnError, webSocketDownloadOnComplete, webSocketDownloadOnTestProgress);
     webSocketDataTransfer.initiateTest();
   }
@@ -199,7 +209,16 @@
       //console.log('webSocketUploadOnTestProgress: ' + result);
     }
     //download
-    var webSocketDataTransfer = new window.webSocketDataTransfer(testPlan.webSocketUrlIPv4, 130000, 'upload',webSocketUploadOnMessage,
+    var version = 'IPv4';
+    var baseUrl = (version === 'IPv6') ? testPlan.baseUrlIPv6NoPort : testPlan.baseUrlIPv4NoPort;
+    for (var i = 0; i < ports.length; i++) {
+      for(var b= 0; b <6; b++ )
+      {
+        downloadUrls.push('ws://' + testPlan.baseUrlIPv4NoPort + ':' + ports[i]);
+      }
+    }
+
+    var webSocketDataTransfer = new window.webSocketDataTransfer(downloadUrls, 130000, 'upload',webSocketUploadOnMessage,
       webSocketUploadOnError, webSocketUploadOnComplete, webSocketUploadOnTestProgress);
     webSocketDataTransfer.initiateTest();
   }

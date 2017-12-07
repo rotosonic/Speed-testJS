@@ -26,11 +26,11 @@
    * @param function callback for onloaded function
    * @param function callback for onerror function
    */
-  function webSocketDataTransfer(url, transferSize, type, callbackOnMessage, callbackOnError,
+  function webSocketDataTransfer(urls, transferSize, type, callbackOnMessage, callbackOnError,
       callbackOnComplete, callbackOnTestProgress) {
-    this.url = 'ws://96.118.56.108:5003';
-    //this.url = 'ws://192.168.200.1:5003';
-    console.log(this.url);
+    //this.url = 'ws://96.118.56.108:5003';
+    this.url = 'ws://127.0.0.1:5020';
+    this.urls = urls;
     this.transferSize = transferSize;
     this.type = type;
     this.clientCallbackOnMessage = callbackOnMessage;
@@ -38,10 +38,10 @@
     this.clientCallbackOnComplete = callbackOnComplete;
     this.clientCallbackOnTestProgress = callbackOnTestProgress;
     if(type==='upload'){
-    this.concurrentRuns = 10;
+    this.concurrentRuns = 4;
   }
   else{
-    this.concurrentRuns = 20;
+    this.concurrentRuns = 17;
   }
     this.testLength = 12000;
     //unique id or test
@@ -59,7 +59,7 @@
     //start time of test suite
     this.beginTime;
     //time for monitor to calcualte stats
-    this.monitorInterval = 100;
+    this.monitorInterval = 500;
     //results object array
     this.results =[];
     //boolean on whether test  suite is running or not
@@ -70,6 +70,8 @@
     this.beginTime;
     //total bytes of the test
     this.totalBytes = 0;
+    //total time of transferSize
+    this.totalTime = 0;
     //total messages
     this.messages = 0;
     //boolean for process adding connections
@@ -104,7 +106,8 @@
    * Initiate the request
    */
   webSocketDataTransfer.prototype.createSocket = function (g) {
-    var webSocket = new window.webSocketData(this.url,this.onTestOpen.bind(this),
+    console.log('newUrl: ' + this.urls[g]);
+    var webSocket = new window.webSocketData(this.urls[g],this.onTestOpen.bind(this),
        this.onMessageComplete.bind(this),this.onTestError.bind(this));
        webSocket.start(g, this.type);
     this.webSockets.push(webSocket);

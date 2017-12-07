@@ -21,14 +21,14 @@ var path = require('path');
 var stream = require('stream');
 var app = express();
 var bodyParser = require('body-parser');
-//var WebSocketServer = require('ws').Server;
+var WebSocketServer = require('ws').Server;
 var domain = require('./modules/domain');
 var validateIP = require('validate-ip-node');
 var os = require('os');
 var apiRouter = express.Router();
 //module provides download test sizes based off of probe data
 var downloadData = require('./modules/downloadData');
-
+var stream = require('stream');
 //set global ipv4 and ipv6 server address
 domain.setIpAddresses();
 
@@ -88,30 +88,67 @@ module.exports.TestServerController = require('./controllers/TestServerControlle
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.listen(webPort, '::');
-app.listen(5020);
-app.listen(5021);
-app.listen(5022);
-app.listen(5023);
-app.listen(5024);
-app.listen(5025);
+//app.listen(5020);
+//app.listen(5021);
+//app.listen(5022);
+//app.listen(5023);
+//app.listen(5024);
+//app.listen(5025);
 //max download buffer size based off of download probing data
 global.maxDownloadBuffer = 532421875;
 global.maxUploadBuffer = 10000000;
+var dataBuffer = new Buffer(1000000);
+for (var j = 0; j < dataBuffer.length; j++) {
+  dataBuffer[j] = 32 + Math.random() * 95;
+}
+global.dataBuffer = dataBuffer;
+var wss1 = new WebSocketServer({perMessageDeflate: false,port: 5020});
+var wss2 = new WebSocketServer({perMessageDeflate: false,port: 5021});
+var wss3 = new WebSocketServer({perMessageDeflate: false,port: 5022});
+var wss4 = new WebSocketServer({perMessageDeflate: false,port: 5023});
+wss1.on('connection', function connection(ws) {
+    console.log('client connected');
 
-var server = require('http').createServer(app);
-var io = require('socket.io')(server);
-//Whenever someone connects this gets executed
-io.on('connection', function(socket) {
-   console.log('A user connected');
+    ws.on('message', function incoming(messageObj) {
+      //check if message is json.. if not then it is an upload test
+      try {
+        JSON.parse(messageObj);
+        } catch (e) {
+            var result = {};
+            result.endTime  = Date.now();
+            result.uploadBytes = messageObj.byteLength;
+            ws.send(JSON.stringify(result));
+            return;
+        }
 
-   //Whenever someone disconnects this piece of code executed
-   socket.on('disconnect', function () {
-      console.log('A user disconnected');
-   });
-});
+        var message = JSON.parse(messageObj);
+        if (message.flag === 'download'){
+          console.log(message.size);
+          //var dataBuffer = new Buffer(message.size);
+          console.log('messageSize' + message.size);
 /*
-var wss = new WebSocketServer({perMessageDeflate: false,port: webSocketPort});
-wss.on('connection', function connection(ws) {
+          var dataBuffer = new Buffer(message.size);
+          for (var j = 0; j < dataBuffer.length; j++) {
+            dataBuffer[j] = 32 + Math.random() * 95;
+          }
+          */
+          ws.send(global.dataBuffer);
+         } else if (message.flag === 'latency') {
+            console.log('received: %s', new Date().getTime());
+            ws.send(message.data);
+        } else if (message.flag === 'upload') {
+            var uploadtime = {'data': Date.now().toString()};
+            var dataBuffer = new Buffer(message.data);
+              console.log(dataBuffer.byteLength);
+            ws.send(JSON.stringify(uploadtime.data));
+        } else {
+
+        }
+
+    });
+});
+
+wss2.on('connection', function connection(ws) {
     console.log('client connected');
 
     ws.on('message', function incoming(messageObj) {
@@ -150,4 +187,83 @@ wss.on('connection', function connection(ws) {
 
     });
 });
-*/
+
+wss3.on('connection', function connection(ws) {
+    console.log('client connected');
+
+    ws.on('message', function incoming(messageObj) {
+      //check if message is json.. if not then it is an upload test
+      try {
+        JSON.parse(messageObj);
+        } catch (e) {
+            var result = {};
+            result.endTime  = Date.now();
+            result.uploadBytes = messageObj.byteLength;
+            ws.send(JSON.stringify(result));
+            return;
+        }
+
+        var message = JSON.parse(messageObj);
+        if (message.flag === 'download'){
+          console.log(message.size);
+          //var dataBuffer = new Buffer(message.size);
+          console.log('messageSize' + message.size);
+          var dataBuffer = new Buffer(message.size);
+          for (var j = 0; j < dataBuffer.length; j++) {
+            dataBuffer[j] = 32 + Math.random() * 95;
+          }
+          ws.send(dataBuffer);
+         } else if (message.flag === 'latency') {
+            console.log('received: %s', new Date().getTime());
+            ws.send(message.data);
+        } else if (message.flag === 'upload') {
+            var uploadtime = {'data': Date.now().toString()};
+            var dataBuffer = new Buffer(message.data);
+              console.log(dataBuffer.byteLength);
+            ws.send(JSON.stringify(uploadtime.data));
+        } else {
+
+        }
+
+    });
+});
+
+wss4.on('connection', function connection(ws) {
+    console.log('client connected');
+
+    ws.on('message', function incoming(messageObj) {
+      //check if message is json.. if not then it is an upload test
+      try {
+        JSON.parse(messageObj);
+        } catch (e) {
+            var result = {};
+            result.endTime  = Date.now();
+            result.uploadBytes = messageObj.byteLength;
+            ws.send(JSON.stringify(result));
+            return;
+        }
+
+        var message = JSON.parse(messageObj);
+        if (message.flag === 'download'){
+          console.log(message.size);
+          //var dataBuffer = new Buffer(message.size);
+          console.log('messageSize' + message.size);
+          var dataBuffer = new Buffer(message.size);
+          for (var j = 0; j < dataBuffer.length; j++) {
+            dataBuffer[j] = 32 + Math.random() * 95;
+          }
+          ws.send(dataBuffer);
+         } else if (message.flag === 'latency') {
+            console.log('received: %s', new Date().getTime());
+            ws.send(message.data);
+        } else if (message.flag === 'upload') {
+            var uploadtime = {'data': Date.now().toString()};
+            var dataBuffer = new Buffer(message.data);
+              console.log(dataBuffer.byteLength);
+            ws.send(JSON.stringify(uploadtime.data));
+        } else {
+
+        }
+
+    });
+});
