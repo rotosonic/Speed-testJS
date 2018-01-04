@@ -60,7 +60,7 @@
     }
     startTestButton = document.querySelector(".action-start");
     addEvent(startTestButton, 'click', function () {
-      startTest();
+      webSocketDownload();
     });
     getTestPlan(function (testPlan) {
       //initialize speedometer
@@ -123,8 +123,8 @@
         }
       }
 
-      //latencyTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4');
-      webSocketDownload();
+      //latencyTest('IPv4');
+      //webSocketDownload();
       //webSocketUpload();
     });
   }
@@ -144,6 +144,7 @@
 
     function webSocketDownloadOnComplete(result) {
       var finalValue = parseFloat(result).toFixed(2);
+      document.getElementById("downloadRate").value = finalValue;
       updateValue([currentTest, '-', 'IPv4'].join(''), finalValue);
       webSocketUpload();
     }
@@ -156,17 +157,10 @@
       //console.log('webSocketDownloadOnTestProgress: ' + result);
     }
     //download
-    downloadUrls.length=0;
-    var version = 'IPv4';
-    var baseUrl = (version === 'IPv6') ? testPlan.baseUrlIPv6NoPort : testPlan.baseUrlIPv4NoPort;
-    for (var i = 0; i < ports.length; i++) {
-      for(var b= 0; b <6; b++ )
-      {
-        downloadUrls.push('ws://' + testPlan.baseUrlIPv4NoPort + ':' + ports[i]);
-      }
-    }
+    //var baseUrl = (version === 'IPv6') ? testPlan.webSocketUrlIPv6 : testPlan.webSocketUrlIPv4;
+    var baseUrl = 'ws://' + testPlan.baseUrlIPv4NoPort + ':' + '5003';
 
-    var webSocketDataTransfer = new window.webSocketDataTransfer(downloadUrls, 500000, 'download',webSocketDownloadOnMessage,
+    var webSocketDataTransfer = new window.webSocketDataTransfer(baseUrl, 0, 'download',webSocketDownloadOnMessage,
       webSocketDownloadOnError, webSocketDownloadOnComplete, webSocketDownloadOnTestProgress);
     webSocketDataTransfer.initiateTest();
   }
@@ -187,6 +181,7 @@
     function webSocketUploadOnComplete(result) {
       var finalValue = parseFloat(result).toFixed(2);
       updateValue([currentTest, '-', 'IPv4'].join(''), finalValue);
+      document.getElementById("uploadRate").value = finalValue;
       //update dom with final result
       startTestButton.disabled = false;
       //update button text to communicate current state of test as In Progress
@@ -209,16 +204,10 @@
       //console.log('webSocketUploadOnTestProgress: ' + result);
     }
     //download
-    var version = 'IPv4';
-    var baseUrl = (version === 'IPv6') ? testPlan.baseUrlIPv6NoPort : testPlan.baseUrlIPv4NoPort;
-    for (var i = 0; i < ports.length; i++) {
-      for(var b= 0; b <6; b++ )
-      {
-        downloadUrls.push('ws://' + testPlan.baseUrlIPv4NoPort + ':' + ports[i]);
-      }
-    }
+    var baseUrl = 'ws://' + testPlan.baseUrlIPv4NoPort + ':' + '5003';
 
-    var webSocketDataTransfer = new window.webSocketDataTransfer(downloadUrls, 130000, 'upload',webSocketUploadOnMessage,
+
+    var webSocketDataTransfer = new window.webSocketDataTransfer(baseUrl, 150000, 'upload',webSocketUploadOnMessage,
       webSocketUploadOnError, webSocketUploadOnComplete, webSocketUploadOnTestProgress);
     webSocketDataTransfer.initiateTest();
   }

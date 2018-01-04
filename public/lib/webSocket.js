@@ -45,7 +45,7 @@
             this._request.onmessage = this._handleOnMessage.bind(this);
             this._request.onclose = this._handleOnClose.bind(this);
             this._request.onerror = this._handleOnError.bind(this);
-            
+
         }
     };
 
@@ -97,6 +97,7 @@
      * close webSocket
      */
     webSocket.prototype.close = function () {
+        console.log('close');
         this._request.close();
     };
 

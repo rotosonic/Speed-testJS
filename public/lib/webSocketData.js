@@ -126,6 +126,7 @@
      * webSocket onMessage error Event
      */
     webSocketData.prototype._handleOnError = function (event) {
+      console.log(event);
         this.callbackOnError(event);
     };
 
@@ -133,6 +134,7 @@
      * webSocket close Event
      */
     webSocketData.prototype._handleOnClose = function (event) {
+      console.log(event);
         if ((event !== null) && (event.code === 1006)) {
             this.callbackOnError('connection error');
         }
