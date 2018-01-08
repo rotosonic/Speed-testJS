@@ -63,6 +63,8 @@
         this.interval = null;
         //total probe bytes
         this.totalBytes = 0;
+        //total chunk totalBytes
+        this.totalChunckBytes = 0;
         //results object array
         this.results = [];
         //results count
@@ -77,7 +79,12 @@
         //upload size for high bandwidth clients(microsoft browsers)
         this.highBandwidthUploadSize = 5000000;
         //upload threshold value
-        this.uploadThresholdValue = 50;
+        this.uploadThresholdValue = 0;
+        //results object array
+        this.resultsMb =[];
+        // fistCheck
+        this.firstCheck = false;
+
     }
 
     /**
@@ -103,7 +110,10 @@
      */
     uploadHttpConcurrentProgress.prototype.onTestAbort = function (result) {
         this._storeResults(result);
-        this.totalBytes = this.totalBytes + result.loaded;
+        //this.totalBytes = this.totalBytes + result.loaded;
+        //this.totalChunckBytes = this.totalChunckBytes + result.chunckLoaded;
+        //var bandwidthMbs = ((this.totalChunckBytes*8)/ 1000000)/((Date.now() - this._beginTime)/1000);
+        //this.resultsMb.push(bandwidthMbs);
     };
     /**
      * onTimeout method
@@ -125,10 +135,27 @@
         if (!this._running) {
             return;
         }
-
+//console.log(result);
         //store results
+        this.totalChunckBytes = this.totalChunckBytes + result.loaded;
         this._storeResults(result);
-
+        var bandwidthMbs = ((this.totalChunckBytes*8)/ 1000000)/((Date.now() - this._beginTime)/1000);
+        this.resultsMb.push(bandwidthMbs);
+        console.log(bandwidthMbs);
+        this.clientCallbackProgress(bandwidthMbs);
+        //first check
+        if((parseInt(Date.now() - this._beginTime)> 1000)&&(parseInt(Date.now() - this._beginTime)<1500)){
+          if(!this.firstCheck){
+            console.log('measurements: ' + this.resultsMb.length);
+            this.firstCheck = true;
+            this.size = this.maxuploadSize;
+            if(this.resultsMb.length>18){
+              this.newRequests(24);
+            }
+          }
+        }
+        this.newRequests(1);
+/*
         if (this.isMicrosoftBrowser) {
 
             if (!this.isMaxUploadSize) {
@@ -164,7 +191,7 @@
             //from the third group run. when a connection ends start a new one.
             this.newRun = true;
         }
-
+*/
     };
 
 
@@ -175,9 +202,47 @@
         if (!this._running) {
             return;
         }
-        this.totalBytes = this.totalBytes + result.loaded;
+        //this.totalBytes = this.totalBytes + result.loaded;
+        //this.totalChunckBytes = this.totalChunckBytes + result.chunckLoaded;
+        //var bandwidthMbs = ((this.totalChunckBytes*8)/ 1000000)/((Date.now() - this._beginTime)/1000);
+        //this.resultsMb.push(bandwidthMbs);
+        //console.log(result.chunckLoaded);
         this._storeResults(result);
     };
+
+    /**
+     * Start the test
+     */
+    uploadHttpConcurrentProgress.prototype.newRequests = function (number) {
+        var request;
+        if (!this._running) {
+            return;
+        }
+
+        if (this._payload === null) {
+            this._payload = getRandomData(this.size);
+        } else {
+            if (this._payload.size !== this.size) {
+                this._payload = getRandomData(this.size);
+            }
+        }
+
+        for (var p = 1; p <= number; p++) {
+            this._testIndex++;
+            this['arrayResults' + this._testIndex] = [];
+            request = new window.xmlHttpRequest('POST', this.urls[0] + '?r='+Date.now(), this.timeout, this.onTestComplete.bind(this), this.onTestProgress.bind(this),
+                this.onTestAbort.bind(this), this.onTestTimeout.bind(this), this.onTestError.bind(this));
+            this._activeTests.push({
+                xhr: request,
+                testRun: this._testIndex
+            });
+
+            request.start(this.size, this._testIndex, this._payload);
+        }
+
+
+    };
+
 
     /**
      * Start the test
@@ -199,7 +264,7 @@
         for (var p = 1; p <= this.concurrentRuns; p++) {
             this._testIndex++;
             this['arrayResults' + this._testIndex] = [];
-            request = new window.xmlHttpRequest('POST', this.urls[0], this.timeout, this.onTestComplete.bind(this), this.onTestProgress.bind(this),
+            request = new window.xmlHttpRequest('POST', this.urls[0]+ '?r='+Date.now(), this.timeout, this.onTestComplete.bind(this), this.onTestProgress.bind(this),
                 this.onTestAbort.bind(this), this.onTestTimeout.bind(this), this.onTestError.bind(this));
             this._activeTests.push({
                 xhr: request,
@@ -283,6 +348,16 @@
     uploadHttpConcurrentProgress.prototype.endTest = function () {
       this._running = false;
       this.abortAll();
+      var finalArray;
+      if(this.resultsMb.length>10){
+        finalArray = this.resultsMb.slice(Math.round(this.resultsMb.length * .75),this.resultsMb.length-1);
+      }else{
+        finalArray = this.resultsMb
+      }
+      var sum = finalArray.reduce(function(a, b) { return a + b; });
+      var avg = sum / finalArray.length;
+      this.clientCallbackComplete(avg);
+/*
       clearInterval(this.interval);
       if (this.uploadResults && this.uploadResults.length) {
           var uploadResults = this.uploadResults;
@@ -294,6 +369,7 @@
       } else {
           this.clientCallbackError('no measurements obtained');
       }
+      */
     };
     /**
      * Monitor testSeries
@@ -316,6 +392,7 @@
         this._running = true;
         this.interval = null;
         this.totalBytes = 0;
+        this.totalChunckBytes = 0;
         this._payload = null;
         this.interval = setInterval(function () {
             self._monitor();

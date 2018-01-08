@@ -44,8 +44,8 @@
   var downloadUrls = [];
   var ports = [5020, 5021, 5022, 5023, 5024, 5025];
   var downloadMonitorInterval = 100;
-  var uploadSize = 10000;
-  var uploadCurrentRuns = 1;
+  var uploadSize = 150000;
+  var uploadCurrentRuns = 4;
   var uploadTestTimeout = 12000;
   var uploadTestLength = 12000;
   var uploadMovingAverage = 18;
@@ -166,6 +166,7 @@
       if (xhr.readyState == XMLHttpRequest.DONE) {
         var data = JSON.parse(xhr.responseText);
         testPlan = data;
+        testPlan.hasIPv6 = false;
         if (testPlan.performLatencyRouting) {
           latencyBasedRouting();
         }
@@ -204,7 +205,7 @@
     }
 
 
-    void (setTimeout(function () { !firstRun && downloadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'); }, 500));
+    void (setTimeout(function () { !firstRun && uploadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'); }, 500));
 
     //update button text to communicate current state of test as In Progress
     startTestButton.innerHTML = 'Testing in Progress ...';
@@ -473,7 +474,8 @@
     myChart.setOption(option, true);
 
     function uploadHttpOnComplete(result) {
-      var finalValue = parseFloat(Math.round(result.mean * 100) / 100).toFixed(2);
+      //var finalValue = parseFloat(Math.round(result.mean * 100) / 100).toFixed(2);
+      var finalValue = result.toFixed(2);
       finalValue = (finalValue > 1000) ? parseFloat(finalValue / 1000).toFixed(2) + ' Gbps' : finalValue + ' Mbps';
       void ((version === 'IPv6') && uploadTest('IPv4'));
       if (!(version === 'IPv6')) {
@@ -494,7 +496,8 @@
       updateValue([currentTest, '-', version].join(''), finalValue);
     }
     function uploadHttpOnProgress(result) {
-      option.series[0].data[0].value = result;
+      //console.log(result);
+      option.series[0].data[0].value = parseFloat(result);
       myChart.setOption(option, true);
     }
     function uploadHttpOnError(result) {
