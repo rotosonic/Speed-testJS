@@ -205,7 +205,7 @@
     }
 
 
-    void (setTimeout(function () { !firstRun && uploadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'); }, 500));
+    void (setTimeout(function () { !firstRun && downloadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'); }, 500));
 
     //update button text to communicate current state of test as In Progress
     startTestButton.innerHTML = 'Testing in Progress ...';
@@ -367,7 +367,7 @@
       if(version==='IPv4'){
         void (!(testPlan.hasIPv6 === 'IPv6') && setTimeout(function () { !firstRun && uploadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'); }, 500));
       }
-      //void (!(version === 'IPv6') && uploadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'));
+      void (!(version === 'IPv6') && uploadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'));
       updateValue([currentTest, '-', version].join(''), finalValue);
     }
 
