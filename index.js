@@ -208,6 +208,14 @@ var dataBuffer25 = new Buffer(3000000);
 for (var j = 0; j < dataBuffer25.length; j++) {
   dataBuffer25[j] = 32 + Math.random() * 95;
 }
+var dataBuffer26 = new Buffer(4000000);
+for (var j = 0; j < dataBuffer26.length; j++) {
+  dataBuffer26[j] = 32 + Math.random() * 95;
+}
+var dataBuffer27 = new Buffer(5000000);
+for (var j = 0; j < dataBuffer27.length; j++) {
+  dataBuffer27[j] = 32 + Math.random() * 95;
+}
 
 global.dataBuffers = [];
 global.dataBuffers.push(dataBuffer0);
@@ -236,6 +244,8 @@ global.dataBuffers.push(dataBuffer22);
 global.dataBuffers.push(dataBuffer23);
 global.dataBuffers.push(dataBuffer24);
 global.dataBuffers.push(dataBuffer25);
+global.dataBuffers.push(dataBuffer26);
+global.dataBuffers.push(dataBuffer27);
 global.webSocketPort
 var wss = new WebSocketServer({perMessageDeflate: false,port: 5003});
 

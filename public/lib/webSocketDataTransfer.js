@@ -163,7 +163,7 @@
               this.transferSize = 1;
             }else{
               console.log('increase transfer size to 5');
-              this.transferSize = 7;
+              this.transferSize = 5;
               numberOfRequests = 2;
               //for (var g = 0; g < 10; g++) {
               //    this.createSocket(this._testIndex, this.type);
