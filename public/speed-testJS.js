@@ -154,7 +154,7 @@
     }
 
     function webSocketDownloadOnTestProgress(result) {
-      //console.log('webSocketDownloadOnTestProgress: ' + result);
+      console.log('webSocketDownloadOnTestProgress: ' + result);
     }
     //download
     //var baseUrl = (version === 'IPv6') ? testPlan.webSocketUrlIPv6 : testPlan.webSocketUrlIPv4;

@@ -144,6 +144,10 @@
       return;
     }
     else{
+      var percentComplete = Math.round(((Date.now() - this.beginTime)/this.testLength)*100);
+      if(percentComplete<100){
+        this.clientCallbackOnTestProgress(percentComplete);
+      }
       this.messages++;
       var event = {};
       event.type = result.type;
@@ -159,7 +163,12 @@
               this.transferSize = 1;
             }else{
               console.log('increase transfer size to 5');
-              this.transferSize = 6;
+              this.transferSize = 7;
+              numberOfRequests = 2;
+              //for (var g = 0; g < 10; g++) {
+              //    this.createSocket(this._testIndex, this.type);
+              //    this._testIndex++;
+              //}
             }
           }
         }
@@ -193,9 +202,9 @@
     if(this._running){
       if(this.type === 'download'){
         var obj = {'flag': 'download', 'id':id, 'size': this.transferSize};
-        //for(var d=0; d<numberOfRequests;d++){
+        for(var d=0; d<numberOfRequests;d++){
           this.webSockets[id].sendMessage(obj);
-        //}
+        }
       }else{
 
         if(this.uploadData === null){
@@ -205,9 +214,9 @@
          }
        }
         var obj = {'data': this.uploadData, 'flag': 'upload', 'id':id, 'size': this.transferSize};
-        //for(var u=0; u<numberOfRequests;u++){
+        for(var u=0; u<numberOfRequests;u++){
           this.webSockets[id].sendMessage(this.uploadData);
-        //}
+        }
       }
     }
   };

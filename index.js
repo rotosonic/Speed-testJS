@@ -259,7 +259,7 @@ wss.on('connection', function connection(ws) {
 
         var message = JSON.parse(messageObj);
         if (message.flag === 'download'){
-          console.log(message.size);
+          console.log(message.size + '' + Date.now());
           //var dataBuffer = new Buffer(message.size);
           console.log('messageSize' + message.size);
           ws.send(global.dataBuffers[message.size]);
