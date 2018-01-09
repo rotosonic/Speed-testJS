@@ -33,8 +33,8 @@
     var option;
     var startTestButton;
     var firstRun = true;
-    var uploadSize = 10000;
-    var uploadCurrentRuns = 1;
+    var uploadSize = 150000;
+    var uploadCurrentRuns = 4;
     var uploadTestTimeout = 12000;
     var uploadTestLength = 12000;
     var uploadMovingAverage = 18;
@@ -151,6 +151,7 @@
             if (xhr.readyState == XMLHttpRequest.DONE) {
                 var data = JSON.parse(xhr.responseText);
                 testPlan = data;
+                testPlan.hasIPv6 = false;
                 if (testPlan.performLatencyRouting) {
                     latencyBasedRouting();
                 }

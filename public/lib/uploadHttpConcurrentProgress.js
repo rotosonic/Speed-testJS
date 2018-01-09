@@ -141,16 +141,17 @@
         this._storeResults(result);
         var bandwidthMbs = ((this.totalChunckBytes*8)/ 1000000)/((Date.now() - this._beginTime)/1000);
         this.resultsMb.push(bandwidthMbs);
-        console.log(bandwidthMbs);
+        console.log(bandwidthMbs.toFixed(2)  + '__' + result.loaded);
         this.clientCallbackProgress(bandwidthMbs);
         //first check
         if((parseInt(Date.now() - this._beginTime)> 1000)&&(parseInt(Date.now() - this._beginTime)<1500)){
           if(!this.firstCheck){
-            console.log('measurements: ' + this.resultsMb.length);
+
             this.firstCheck = true;
-            this.size = this.maxuploadSize;
+            //this.size = this.maxuploadSize;
             if(this.resultsMb.length>18){
-              this.newRequests(24);
+              console.log('measurements: ' + this.resultsMb.length + ' increase for higher bandwidths');
+              //this.newRequests(1);
             }
           }
         }
@@ -375,7 +376,7 @@
      * Monitor testSeries
      */
     uploadHttpConcurrentProgress.prototype._monitor = function () {
-        this._calculateResults();
+        //this._calculateResults();
         //check for end of test
         if ((Date.now() - this._beginTime) > this.testLength) {
           this.endTest();
