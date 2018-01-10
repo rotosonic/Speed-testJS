@@ -215,6 +215,7 @@
     }
 
     function uploadTest(version) {
+        var uploadHttpConcurrentProgress;
         var currentTest = 'upload';
         option.series[0].data[0].value = 0;
         option.series[0].data[0].name = 'Testing Upload...';
@@ -240,6 +241,7 @@
                 startTestButton.disabled = false;
                 option.series[0].detail.show = false;
                 myChart.setOption(option, true);
+                uploadHttpConcurrentProgress = null;
             }
 
             updateValue([currentTest, '-', version].join(''), finalValue);
@@ -271,7 +273,6 @@
                 myChart.setOption(option, true);
         }
 
-        var uploadHttpConcurrentProgress;
         var baseUrl = (version === 'IPv6') ? testPlan.baseUrlIPv6NoPort : testPlan.baseUrlIPv4NoPort;
         for (var i = 0; i < ports.length; i++) {
             for (var b = 0; b < 6; b++) {
