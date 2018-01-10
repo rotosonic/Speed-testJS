@@ -70,6 +70,12 @@
         this.resultsCount = 0;
         //results to send to client
         this.downloadResults = [];
+        //results object array
+        this.resultsMb =[];
+        // fistCheck
+        this.firstCheck = false;
+        //total chunk totalBytes
+        this.totalChunckBytes = 0;
     }
 
     /**
@@ -94,8 +100,12 @@
      * @return abort object
      */
     downloadHttpConcurrentProgress.prototype.onTestAbort = function (result) {
-      this._storeResults(result);
-      this.totalBytes = this.totalBytes + result.loaded;
+      //this._storeResults(result);
+      //this.totalBytes = this.totalBytes + result.loaded;
+      this.totalChunckBytes = this.totalChunckBytes + result.chunckLoaded;
+      var bandwidthMbs = ((this.totalChunckBytes*8)/ 1000000)/((Date.now() - this._beginTime)/1000);
+      this.resultsMb.push(bandwidthMbs);
+      this.clientCallbackProgress(bandwidthMbs);
     };
     /**
      * onTimeout method
@@ -119,8 +129,11 @@
             return;
         }
 
-        //store results
-        this._storeResults(result);
+        this.totalChunckBytes = this.totalChunckBytes + result.chunckLoaded;
+        var bandwidthMbs = ((this.totalChunckBytes*8)/ 1000000)/((Date.now() - this._beginTime)/1000);
+        this.resultsMb.push(bandwidthMbs);
+        this.clientCallbackProgress(bandwidthMbs);
+        //check below might want to just start another connection
         this.start();
         };
 
@@ -137,9 +150,11 @@
         if ((Date.now() - this._beginTime) > this.testLength) {
             this.endTest();
         }
-        this.totalBytes = this.totalBytes + result.loaded;
-        this._storeResults(result);
-
+        this.totalChunckBytes = this.totalChunckBytes + result.chunckLoaded;
+        var bandwidthMbs = ((this.totalChunckBytes*8)/ 1000000)/((Date.now() - this._beginTime)/1000);
+console.log(bandwidthMbs);
+        this.resultsMb.push(bandwidthMbs);
+          this.clientCallbackProgress(bandwidthMbs);
     };
 
     /**
@@ -189,44 +204,7 @@
      * Monitor testSeries
      */
     downloadHttpConcurrentProgress.prototype._monitor = function () {
-        var intervalBandwidth = 0;
-        var totalLoaded = 0;
-        var totalTime = 0;
-        var intervalCounter = 0;
-        this.resultsCount++;
 
-        if (this.results.length > 0) {
-            for (var i = 0; i < this.results.length; i++) {
-                if (this.results[i].timeStamp > (Date.now() - this.monitorInterval)) {
-                    intervalBandwidth = intervalBandwidth + parseFloat(this.results[i].bandwidth);
-                    totalLoaded = totalLoaded + this.results[i].chunckLoaded;
-                    totalTime = totalTime + this.results[i].totalTime;
-                    intervalCounter++;
-                }
-            }
-            if (!isNaN(intervalBandwidth / intervalCounter)) {
-                var transferSizeMbs = (totalLoaded * 8) / 1000000;
-                var transferDurationSeconds = this.monitorInterval / 1000;
-                this.finalResults.push(transferSizeMbs / transferDurationSeconds);
-                var lastElem = Math.min(this.finalResults.length, this.movingAverage);
-                if (lastElem > 0) {
-                    var singleMovingAverage = 0;
-                    for (var j = 1; j <= lastElem; j++) {
-                        if (isFinite(this.finalResults[this.finalResults.length - j])) {
-                            singleMovingAverage = singleMovingAverage + this.finalResults[this.finalResults.length - j];
-
-                        }
-                    }
-                    singleMovingAverage = singleMovingAverage / lastElem;
-                    if (singleMovingAverage > 0) {
-                        this.downloadResults.push(singleMovingAverage);
-                        this.clientCallbackProgress(singleMovingAverage);
-                    }
-                }
-
-            }
-
-        }
         //check for end of test
         if ((Date.now() - this._beginTime) > this.testLength) {
           this.endTest();
@@ -238,12 +216,18 @@
      */
      downloadHttpConcurrentProgress.prototype.endTest = function(){
        this._running = false;
-       clearInterval(this.interval);
-       if (this.downloadResults && this.downloadResults.length) {
-           this.clientCallbackComplete(this.downloadResults);
-       } else {
-           this.clientCallbackError('no measurements obtained');
+       this.abortAll();
+       var finalArray;
+       if(this.resultsMb.length>10){
+         finalArray = this.resultsMb.slice(Math.round(this.resultsMb.length * .75),this.resultsMb.length-1);
+       }else{
+         this.clientCallbackError('no measurements obtained');
+         return;
        }
+       var sum = finalArray.reduce(function(a, b) { return a + b; });
+       var avg = sum / finalArray.length;
+       this.clientCallbackComplete(avg);
+       clearInterval(this.interval);
        this.abortAll();
      };
 
@@ -257,6 +241,7 @@
         this.interval = null;
         this.downloadResults.length = 0;
         this.totalBytes = 0;
+        this.totalChunckBytes = 0;
         this.start();
         var self = this;
         this.interval = setInterval(function () {

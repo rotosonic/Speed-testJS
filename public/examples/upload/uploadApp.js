@@ -40,7 +40,7 @@
     var uploadMovingAverage = 18;
     var urls = [];
     var ports = [5020, 5021, 5022, 5023, 5024, 5025];
-    var monitorInterval = 400;
+    var monitorInterval = 1000;
     var isMicrosoftBrowser = false;
 
     function initTest() {
@@ -224,9 +224,9 @@
 
         function uploadHttpOnComplete(result) {
 
-            var finalValue = parseFloat(Math.round(result.mean * 100) / 100).toFixed(2);
-            finalValue = (finalValue > 1000) ? parseFloat(finalValue / 1000).toFixed(2) + ' Gbps' : finalValue + ' Mbps';
-            void ((version === 'IPv6') && uploadTest('IPv4'));
+          var finalValue = result.toFixed(2);
+          finalValue = (finalValue > 1000) ? parseFloat(finalValue / 1000).toFixed(2) + ' Gbps' : finalValue + ' Mbps';
+          void ((version === 'IPv6') && uploadTest('IPv4'));
             if (!(version === 'IPv6')) {
                 //update dom with final result
                 startTestButton.disabled = false;

@@ -33,24 +33,24 @@
   var option;
   var startTestButton;
   var firstRun = true;
-  var downloadSize = 230483949;
+  var downloadSize = 230483940;
   var testServerTimeout = 2000;
   var latencyTimeout = 3000;
-  var downloadCurrentRuns = 18;
+  var downloadCurrentRuns = 2;
   var downloadTestTimeout = 12000;
   var downloadTestLength = 12000;
   var downloadMovingAverage = 18;
   var downloadProgressInterval = 25;
   var downloadUrls = [];
   var ports = [5020, 5021, 5022, 5023, 5024, 5025];
-  var downloadMonitorInterval = 100;
+  var downloadMonitorInterval = 1000;
   var uploadSize = 150000;
   var uploadCurrentRuns = 4;
   var uploadTestTimeout = 12000;
   var uploadTestLength = 12000;
   var uploadMovingAverage = 18;
   var uploadUrls = [];
-  var uploadMonitorInterval = 200;
+  var uploadMonitorInterval = 1000;
   var isMicrosoftBrowser = false;
   var sliceStartValue = 0.3;
   var sliceEndValue = 0.9;
@@ -360,7 +360,8 @@
     myChart.setOption(option, true);
 
     function calculateStatsonComplete(result) {
-      var finalValue = parseFloat(Math.round(result.stats.mean * 100) / 100).toFixed(2);
+      //var finalValue = parseFloat(Math.round(result.stats.mean * 100) / 100).toFixed(2);
+      var finalValue = parseFloat(Math.round(result * 100) / 100).toFixed(2);
       finalValue = (finalValue > 1000) ? parseFloat(finalValue / 1000).toFixed(2) + ' Gbps' : finalValue + ' Mbps';
       void (version === 'IPv6' && downloadTest('IPv4'));
 
@@ -372,9 +373,16 @@
     }
 
     function downloadHttpOnComplete(result) {
+      //var finalValue = parseFloat(Math.round(result.stats.mean * 100) / 100).toFixed(2);
+      var finalValue = parseFloat(Math.round(result * 100) / 100).toFixed(2);
+      finalValue = (finalValue > 1000) ? parseFloat(finalValue / 1000).toFixed(2) + ' Gbps' : finalValue + ' Mbps';
+      void (version === 'IPv6' && downloadTest('IPv4'));
 
-        var calculateMeanStats = new window.statisticalCalculator(result, false, sliceStartValue, sliceEndValue, calculateStatsonComplete);
-        calculateMeanStats.getResults();
+      if(version==='IPv4'){
+        void (!(testPlan.hasIPv6 === 'IPv6') && setTimeout(function () { !firstRun && uploadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'); }, 500));
+      }
+      void (!(version === 'IPv6') && uploadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'));
+      updateValue([currentTest, '-', version].join(''), finalValue);
     }
 
     function downloadHttpOnProgress(result) {

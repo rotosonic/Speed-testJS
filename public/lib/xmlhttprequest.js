@@ -101,7 +101,7 @@
       this._request.abort();
     }
   };
-  
+
   /**
   * Mark the start time of the request
   */
@@ -177,6 +177,7 @@
               result.totalTime = Date.now() - this.startTime;
               result.id = this.id;
               if(this.method==='POST'){
+
                 var transferSizeMbs = (this.transferSize * 8) / 1000000;
                 var transferDurationSeconds = result.totalTime/1000;
                 result.bandwidth = transferSizeMbs/transferDurationSeconds;

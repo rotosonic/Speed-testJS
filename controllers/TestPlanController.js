@@ -82,6 +82,9 @@ class TestPlanController {
             testPlan.clientIPAddress = 'na';
         }
         //set server base url
+        if (req.headers.host.indexOf("localhost") > -1) {
+          global.AddressIpv4 = '127.0.0.1';
+        }
         testPlan.webSocketUrlIPv4 = 'ws://' + global.AddressIpv4 + ':' + global.webSocketPort;
         testPlan.webSocketPort = global.webSocketPort;
         if (global.hasAddressIpv6) {
