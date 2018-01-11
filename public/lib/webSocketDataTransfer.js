@@ -158,7 +158,7 @@
         if((parseInt(Date.now() - this.beginTime)> 1000)&&(parseInt(Date.now() - this.beginTime)<1500)){
           if(!this.firstCheck){
             this.firstCheck = true;
-            if(this.messages<20){
+            if(parseFloat(bandwidthMbs).toFixed(2)>50){
               console.log('increase transfer size to 1');
               this.transferSize = 1;
             }else{
@@ -174,7 +174,6 @@
         }
       }else{
         if((parseInt((Date.now() - this.beginTime))> 1000)&&(parseFloat(bandwidthMbs).toFixed(2)>50)){
-          var numberOfRequests = 2;
           if(this.webSockets.length <24){
           for (var i = 1; i < 20; i++) {
             this.createSocket(this._testIndex, this.type);
@@ -184,7 +183,7 @@
 
         }
         }
-  
+
       }
       this.clientCallbackOnMessage(bandwidthMbs);
       this.resultsMb.push(bandwidthMbs);

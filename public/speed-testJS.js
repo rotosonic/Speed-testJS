@@ -54,7 +54,7 @@
   var isMicrosoftBrowser = false;
   var sliceStartValue = 0.3;
   var sliceEndValue = 0.9;
-
+  var testType = 'http';
   function initTest() {
     function addEvent(el, ev, fn) {
       void (el.addEventListener && el.addEventListener(ev, fn, false));
@@ -206,7 +206,11 @@
 
 
     //void (setTimeout(function () { !firstRun && downloadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'); }, 500));
-webSocketDownload();
+
+latencyTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4');
+
+
+//webSocketDownload();
     //update button text to communicate current state of test as In Progress
     startTestButton.innerHTML = 'Testing in Progress ...';
     //disable button
@@ -242,7 +246,12 @@ webSocketDownload();
       else{
         updateValue(currentTest, result[0].time + ' ms');
       }
-
+      testType = document.querySelector('input[name=testType]:checked').value;
+      if(testType === 'http'){
+        downloadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4')
+      }else{
+        webSocketDownload();
+      }
     }
 
     function latencyHttpOnProgress() {
@@ -378,13 +387,13 @@ webSocketDownload();
       var finalValue = parseFloat(Math.round(result * 100) / 100).toFixed(2);
       finalValue = (finalValue > 1000) ? parseFloat(finalValue / 1000).toFixed(2) + ' Gbps' : finalValue + ' Mbps';
       document.getElementById("downloadRate").value = finalValue;
-      //void (version === 'IPv6' && downloadTest('IPv4'));
+      void (version === 'IPv6' && downloadTest('IPv4'));
 
-      //if(version==='IPv4'){
-      //  void (!(testPlan.hasIPv6 === 'IPv6') && setTimeout(function () { !firstRun && websocket(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'); }, 500));
+      if(version==='IPv4'){
+        void (!(testPlan.hasIPv6 === 'IPv6') && setTimeout(function () { !firstRun && uploadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'); }, 500));
 
-      //}
-      webSocketUpload();
+      }
+
       updateValue([currentTest, '-', version].join(''), finalValue);
       downloadHttpConcurrentProgress = null;
     }
@@ -603,7 +612,7 @@ webSocketDownload();
         var baseUrl = 'ws://' + testPlan.baseUrlIPv4NoPort + ':' + '5003';
 
 
-        var webSocketDataTransfer = new window.webSocketDataTransfer(baseUrl, 150000, 'upload',webSocketUploadOnMessage,
+        var webSocketDataTransfer = new window.webSocketDataTransfer(testPlan.webSocketUrlIPv4, 150000, 'upload',webSocketUploadOnMessage,
           webSocketUploadOnError, webSocketUploadOnComplete, webSocketUploadOnTestProgress);
         webSocketDataTransfer.initiateTest();
       }
