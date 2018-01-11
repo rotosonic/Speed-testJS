@@ -102,8 +102,8 @@
     downloadHttpConcurrentProgress.prototype.onTestAbort = function (result) {
       //this._storeResults(result);
       //this.totalBytes = this.totalBytes + result.loaded;
-      this.totalChunckBytes = this.totalChunckBytes + result.chunckLoaded;
-      var bandwidthMbs = ((this.totalChunckBytes*8)/ 1000000)/((Date.now() - this._beginTime)/1000);
+      this.totalBytes = this.totalBytes + result.chunckLoaded;
+      var bandwidthMbs = ((this.totalBytes*8)/ 1000000)/((Date.now() - this._beginTime)/1000);
       this.resultsMb.push(bandwidthMbs);
       this.clientCallbackProgress(bandwidthMbs);
     };
@@ -129,12 +129,12 @@
             return;
         }
 
-        this.totalChunckBytes = this.totalChunckBytes + result.chunckLoaded;
-        var bandwidthMbs = ((this.totalChunckBytes*8)/ 1000000)/((Date.now() - this._beginTime)/1000);
+        this.totalBytes = this.totalBytes + result.chunckLoaded;
+        var bandwidthMbs = ((this.totalBytes*8)/ 1000000)/((Date.now() - this._beginTime)/1000);
         this.resultsMb.push(bandwidthMbs);
         this.clientCallbackProgress(bandwidthMbs);
         //check below might want to just start another connection
-        this.start();
+        this.newRequests(1);
         };
 
 
@@ -150,12 +150,35 @@
         if ((Date.now() - this._beginTime) > this.testLength) {
             this.endTest();
         }
-        this.totalChunckBytes = this.totalChunckBytes + result.chunckLoaded;
-        var bandwidthMbs = ((this.totalChunckBytes*8)/ 1000000)/((Date.now() - this._beginTime)/1000);
-console.log(bandwidthMbs);
+        this.totalBytes = this.totalBytes + result.chunckLoaded;
+        var bandwidthMbs = ((this.totalBytes*8)/ 1000000)/((Date.now() - this._beginTime)/1000);
         this.resultsMb.push(bandwidthMbs);
           this.clientCallbackProgress(bandwidthMbs);
     };
+
+    /**
+     * Start the test
+     */
+    downloadHttpConcurrentProgress.prototype.newRequests = function (number) {
+//TODO this.totalBytes is undefined if this method or start called
+      if (!this._running) {
+            return;
+      }
+
+            for (var g = 1; g <= number; g++) {
+                this._testIndex++;
+                var request = new window.xmlHttpRequest('GET', this.urls[g]+ this.size +  '&r=' + Math.random(), this.timeout, this.onTestComplete.bind(this), this.onTestProgress.bind(this),
+                    this.onTestAbort.bind(this), this.onTestTimeout.bind(this), this.onTestError.bind(this),this.progressIntervalDownload);
+                this._activeTests.push({
+                    xhr: request,
+                    testRun: this._testIndex
+                });
+                request.start(0, this._testIndex);
+
+            }
+
+    };
+
 
     /**
      * Start the test
@@ -186,6 +209,7 @@ console.log(bandwidthMbs);
         for (var i = 0; i < this._activeTests.length; i++) {
             if (typeof(this._activeTests[i]) !== 'undefined') {
                 this._activeTests[i].xhr._request.abort();
+                this._activeTests[i].xhr._request = null;
             }
         }
     };
@@ -228,7 +252,6 @@ console.log(bandwidthMbs);
        var avg = sum / finalArray.length;
        this.clientCallbackComplete(avg);
        clearInterval(this.interval);
-       this.abortAll();
      };
 
     /**

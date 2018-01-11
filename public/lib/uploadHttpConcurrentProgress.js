@@ -94,12 +94,14 @@
     uploadHttpConcurrentProgress.prototype.onTestError = function (result) {
         if (this._running) {
           if ((Date.now() - this._beginTime) > this.testLength) {
+            console.log('endTest called');
             this.endTest();
           }
           else{
             this._running = false;
             clearInterval(this.interval);
             this.clientCallbackError(result);
+            console.log('abortAll call');
             this.abortAll();
           }
         }
@@ -125,6 +127,7 @@
     uploadHttpConcurrentProgress.prototype.onTestTimeout = function () {
         if (this._running) {
             if ((Date.now() - this._beginTime) > this.testLength) {
+              console.log('endTest called');
               this.endTest();
             }
 
@@ -251,7 +254,9 @@
         clearInterval(this.interval);
         for (var i = 0; i < this._activeTests.length; i++) {
             if (typeof(this._activeTests[i]) !== 'undefined') {
+              console.log(i);
                 this._activeTests[i].xhr._request.abort();
+                this._activeTests[i].xhr._request = null;
             }
         }
     };
@@ -270,6 +275,7 @@
      */
     uploadHttpConcurrentProgress.prototype.endTest = function () {
       this._running = false;
+      console.log('abortAll call');
       this.abortAll();
       var finalArray;
       if(this.resultsMb.length>10){
@@ -289,9 +295,11 @@
      */
     uploadHttpConcurrentProgress.prototype._monitor = function () {
         //TODO check after 4 seconds to see if we have any results. If not the check if upload data was created. decide to create a smaller upload or report error
-
+        console.log((Date.now() - this._beginTime));
         //check for end of test
         if ((Date.now() - this._beginTime) > this.testLength) {
+          clearInterval(this.interval);
+          console.log('endTest call');
           this.endTest();
         }
     };
@@ -312,7 +320,7 @@
         this.firstCheck = false;
         this.interval = setInterval(function () {
             self._monitor();
-        }, 100);
+        }, this.monitorInterval);
         this.start();
         var self = this;
 

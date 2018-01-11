@@ -97,12 +97,26 @@ app.listen(5025);
 //max download buffer size based off of download probing data
 global.maxDownloadBuffer = 532421875;
 global.maxUploadBuffer = 10000000;
+global.dataBuffer = new Buffer(50048394);
+for (var j = 0; j < dataBuffer.length; j++) {
+  dataBuffer[j] = 32 + Math.random() * 95;
+}
 
 var wss = new WebSocketServer({port: webSocketPort});
 wss.on('connection', function connection(ws) {
     console.log('client connected');
 
     ws.on('message', function incoming(messageObj) {
+      //check if message is json.. if not then it is an upload test
+            try {
+              JSON.parse(messageObj);
+              } catch (e) {
+                  var result = {};
+                  result.endTime  = Date.now();
+                  result.uploadBytes = messageObj.byteLength;
+                  ws.send(JSON.stringify(result));
+                  return;
+              }
         var message = JSON.parse(messageObj);
         /*
          if (message.flag === 'download'){

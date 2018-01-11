@@ -33,10 +33,10 @@
   var option;
   var startTestButton;
   var firstRun = true;
-  var downloadSize = 230483940;
+  var downloadSize = 50048394;
   var testServerTimeout = 2000;
   var latencyTimeout = 3000;
-  var downloadCurrentRuns = 2;
+  var downloadCurrentRuns = 24;
   var downloadTestTimeout = 12000;
   var downloadTestLength = 12000;
   var downloadMovingAverage = 18;
@@ -44,8 +44,8 @@
   var downloadUrls = [];
   var ports = [5020, 5021, 5022, 5023, 5024, 5025];
   var downloadMonitorInterval = 1000;
-  var uploadSize = 1500000;
-  var uploadCurrentRuns = 4;
+  var uploadSize = 150000;
+  var uploadCurrentRuns = 6;
   var uploadTestTimeout = 12000;
   var uploadTestLength = 12000;
   var uploadMovingAverage = 18;
@@ -126,7 +126,7 @@
         }
       }
 
-      latencyTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4');
+      //latencyTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4');
 
     });
   }
@@ -205,8 +205,8 @@
     }
 
 
-    void (setTimeout(function () { !firstRun && downloadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'); }, 500));
-
+    //void (setTimeout(function () { !firstRun && downloadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'); }, 500));
+webSocketDownload();
     //update button text to communicate current state of test as In Progress
     startTestButton.innerHTML = 'Testing in Progress ...';
     //disable button
@@ -377,13 +377,14 @@
       //var finalValue = parseFloat(Math.round(result.stats.mean * 100) / 100).toFixed(2);
       var finalValue = parseFloat(Math.round(result * 100) / 100).toFixed(2);
       finalValue = (finalValue > 1000) ? parseFloat(finalValue / 1000).toFixed(2) + ' Gbps' : finalValue + ' Mbps';
-document.getElementById("downloadRate").value = finalValue;
-      void (version === 'IPv6' && downloadTest('IPv4'));
+      document.getElementById("downloadRate").value = finalValue;
+      //void (version === 'IPv6' && downloadTest('IPv4'));
 
-      if(version==='IPv4'){
-        void (!(testPlan.hasIPv6 === 'IPv6') && setTimeout(function () { !firstRun && uploadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'); }, 500));
-      }
-      void (!(version === 'IPv6') && uploadTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'));
+      //if(version==='IPv4'){
+      //  void (!(testPlan.hasIPv6 === 'IPv6') && setTimeout(function () { !firstRun && websocket(testPlan.hasIPv6 ? 'IPv6' : 'IPv4'); }, 500));
+
+      //}
+      webSocketUpload();
       updateValue([currentTest, '-', version].join(''), finalValue);
       downloadHttpConcurrentProgress = null;
     }
@@ -477,12 +478,144 @@ document.getElementById("downloadRate").value = finalValue;
     downloadHttpConcurrentProgress.initiateTest();
   }
 
+  function webSocketUpload(){
+      var currentTest = 'upload';
+      option.series[0].data[0].value = 0;
+      option.series[0].data[0].name = 'Testing Upload ...';
+      option.series[0].detail.formatter = formatSpeed;
+      option.series[0].detail.show = true;
+      myChart.setOption(option, true);
+
+      function webSocketUploadOnMessage(result) {
+        option.series[0].data[0].value = result;
+        myChart.setOption(option, true);
+      }
+
+      function webSocketUploadOnComplete(result) {
+        var finalValue = parseFloat(result).toFixed(2);
+        updateValue([currentTest, '-', 'IPv4'].join(''), finalValue);
+        document.getElementById("uploadRate").value = finalValue;
+        //update dom with final result
+        startTestButton.disabled = false;
+        //update button text to communicate current state of test as In Progress
+        startTestButton.innerHTML = 'Start Test';
+        option.series[0].data[0].value = 0;
+        option.series[0].data[0].name = 'Test Complete';
+        //set accessiblity aria-disabled state.
+        //This will also effect the visual look by corresponding css
+        startTestButton.setAttribute('aria-disabled', false);
+        startTestButton.disabled = false;
+        option.series[0].detail.show = false;
+        myChart.setOption(option, true);
+      }
+
+      function webSocketUploadOnError(result) {
+        //console.log('webSocketUploadOnError: ' + result);
+      }
+
+      function webSocketUploadOnTestProgress(result) {
+        //console.log('webSocketUploadOnTestProgress: ' + result);
+      }
+      //download
+      //var baseUrl = 'ws://' + testPlan.baseUrlIPv4NoPort + ':' + '5003';
+
+
+      var webSocketDataTransfer = new window.webSocketDataTransfer(testPlan.webSocketUrlIPv4, 150000, 'upload',webSocketUploadOnMessage,
+        webSocketUploadOnError, webSocketUploadOnComplete, webSocketUploadOnTestProgress);
+      webSocketDataTransfer.initiateTest();
+    }
+
+    function webSocketDownload(){
+        var currentTest = 'download';
+        option.series[0].data[0].value = 0;
+        option.series[0].data[0].name = 'Testing Download ...';
+        option.series[0].detail.formatter = formatSpeed;
+        option.series[0].detail.show = true;
+        myChart.setOption(option, true);
+
+        function webSocketDownloadOnMessage(result) {
+          option.series[0].data[0].value = result;
+          myChart.setOption(option, true);
+        }
+
+        function webSocketDownloadOnComplete(result) {
+          var finalValue = parseFloat(result).toFixed(2);
+          document.getElementById("downloadRate").value = finalValue;
+          updateValue([currentTest, '-', 'IPv4'].join(''), finalValue);
+          webSocketUpload();
+        }
+
+        function webSocketDownloadOnError(result) {
+          console.log('webSocketDownloadOnError: ' + result);
+        }
+
+        function webSocketDownloadOnTestProgress(result) {
+          console.log('webSocketDownloadOnTestProgress: ' + result);
+        }
+        //download
+        //var baseUrl = (version === 'IPv6') ? testPlan.webSocketUrlIPv6 : testPlan.webSocketUrlIPv4;
+        var baseUrl = 'ws://' + testPlan.baseUrlIPv4NoPort + ':' + '5003';
+
+        var webSocketDataTransfer = new window.webSocketDataTransfer(testPlan.webSocketUrlIPv4, 0, 'download',webSocketDownloadOnMessage,
+          webSocketDownloadOnError, webSocketDownloadOnComplete, webSocketDownloadOnTestProgress);
+        webSocketDataTransfer.initiateTest();
+      }
+
+      function webSocketUpload(){
+        var currentTest = 'upload';
+        option.series[0].data[0].value = 0;
+        option.series[0].data[0].name = 'Testing Upload ...';
+        option.series[0].detail.formatter = formatSpeed;
+        option.series[0].detail.show = true;
+        myChart.setOption(option, true);
+
+        function webSocketUploadOnMessage(result) {
+          option.series[0].data[0].value = result;
+          myChart.setOption(option, true);
+        }
+
+        function webSocketUploadOnComplete(result) {
+          var finalValue = parseFloat(result).toFixed(2);
+          updateValue([currentTest, '-', 'IPv4'].join(''), finalValue);
+          document.getElementById("uploadRate").value = finalValue;
+          //update dom with final result
+          startTestButton.disabled = false;
+          //update button text to communicate current state of test as In Progress
+          startTestButton.innerHTML = 'Start Test';
+          option.series[0].data[0].value = 0;
+          option.series[0].data[0].name = 'Test Complete';
+          //set accessiblity aria-disabled state.
+          //This will also effect the visual look by corresponding css
+          startTestButton.setAttribute('aria-disabled', false);
+          startTestButton.disabled = false;
+          option.series[0].detail.show = false;
+          myChart.setOption(option, true);
+        }
+
+        function webSocketUploadOnError(result) {
+          //console.log('webSocketUploadOnError: ' + result);
+        }
+
+        function webSocketUploadOnTestProgress(result) {
+          //console.log('webSocketUploadOnTestProgress: ' + result);
+        }
+        //download
+        var baseUrl = 'ws://' + testPlan.baseUrlIPv4NoPort + ':' + '5003';
+
+
+        var webSocketDataTransfer = new window.webSocketDataTransfer(baseUrl, 150000, 'upload',webSocketUploadOnMessage,
+          webSocketUploadOnError, webSocketUploadOnComplete, webSocketUploadOnTestProgress);
+        webSocketDataTransfer.initiateTest();
+      }
+
+
   function uploadTest(version) {
     var currentTest = 'upload';
     var uploadHttpConcurrentProgress;
     option.series[0].data[0].value = 0;
-    option.series[0].data[0].name = 'Testing Upload...';
+    option.series[0].data[0].name = 'Testing Upload ...';
     option.series[0].detail.formatter = formatSpeed;
+    option.series[0].detail.show = true;
     myChart.setOption(option, true);
 
     function uploadHttpOnComplete(result) {
