@@ -207,6 +207,7 @@
       var transferDurationSeconds = this.totalTime/1000;
       result.bandwidth = transferSizeMbs / transferDurationSeconds;
       result.loaded = response.loaded;
+      result.chunckLoaded = response.loaded - this.prevLoad;
       result.id = this.id;
       if(isFinite(result.bandwidth)) {
           if (this.method === 'GET') {

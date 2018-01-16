@@ -24,6 +24,7 @@
     //init for test
     initTest();
   };
+ window.uploadData = "";
 
   var testRunner = [];
   var currentInterval;
@@ -36,21 +37,21 @@
   var downloadSize = 50048394;
   var testServerTimeout = 2000;
   var latencyTimeout = 3000;
-  var downloadCurrentRuns = 24;
+  var downloadCurrentRuns = 4;
   var downloadTestTimeout = 12000;
   var downloadTestLength = 12000;
   var downloadMovingAverage = 18;
   var downloadProgressInterval = 25;
   var downloadUrls = [];
   var ports = [5020, 5021, 5022, 5023, 5024, 5025];
-  var downloadMonitorInterval = 1000;
-  var uploadSize = 150000;
-  var uploadCurrentRuns = 6;
+  var downloadMonitorInterval = 500;
+  var uploadSize = 10000;
+  var uploadCurrentRuns = 4;
   var uploadTestTimeout = 12000;
   var uploadTestLength = 12000;
   var uploadMovingAverage = 18;
   var uploadUrls = [];
-  var uploadMonitorInterval = 1000;
+  var uploadMonitorInterval = 500;
   var isMicrosoftBrowser = false;
   var sliceStartValue = 0.3;
   var sliceEndValue = 0.9;
@@ -385,7 +386,7 @@ latencyTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4');
     function downloadHttpOnComplete(result) {
       //var finalValue = parseFloat(Math.round(result.stats.mean * 100) / 100).toFixed(2);
       var finalValue = parseFloat(Math.round(result * 100) / 100).toFixed(2);
-      finalValue = (finalValue > 1000) ? parseFloat(finalValue / 1000).toFixed(2) + ' Gbps' : finalValue + ' Mbps';
+      //finalValue = (finalValue > 1000) ? parseFloat(finalValue / 1000).toFixed(2) + ' Gbps' : finalValue + ' Mbps';
       document.getElementById("downloadRate").value = finalValue;
       void (version === 'IPv6' && downloadTest('IPv4'));
 
@@ -474,6 +475,7 @@ latencyTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4');
 
     downloadUrls.length=0;
     var baseUrl = (version === 'IPv6') ? testPlan.baseUrlIPv6NoPort : testPlan.baseUrlIPv4NoPort;
+baseUrl = '69.241.66.214';
     for (var i = 0; i < ports.length; i++) {
       for(var b= 0; b <6; b++ )
       {
@@ -559,7 +561,7 @@ latencyTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4');
         }
 
         function webSocketDownloadOnTestProgress(result) {
-          console.log('webSocketDownloadOnTestProgress: ' + result);
+          //console.log('webSocketDownloadOnTestProgress: ' + result);
         }
         //download
         //var baseUrl = (version === 'IPv6') ? testPlan.webSocketUrlIPv6 : testPlan.webSocketUrlIPv4;
@@ -630,7 +632,7 @@ latencyTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4');
     function uploadHttpOnComplete(result) {
       //var finalValue = parseFloat(Math.round(result.mean * 100) / 100).toFixed(2);
       var finalValue = result.toFixed(2);
-      finalValue = (finalValue > 1000) ? parseFloat(finalValue / 1000).toFixed(2) + ' Gbps' : finalValue + ' Mbps';
+      //finalValue = (finalValue > 1000) ? parseFloat(finalValue / 1000).toFixed(2) + ' Gbps' : finalValue + ' Mbps';
 document.getElementById("uploadRate").value = finalValue;
       void ((version === 'IPv6') && uploadTest('IPv4'));
       if (!(version === 'IPv6')) {
@@ -686,6 +688,7 @@ document.getElementById("uploadRate").value = finalValue;
 
       var baseUrl = (version === 'IPv6') ? testPlan.baseUrlIPv6NoPort : testPlan.baseUrlIPv4NoPort;
       uploadUrls.length = 0;
+      baseUrl = '69.241.66.214';
       for (var i = 0; i < ports.length; i++) {
           for (var b = 0; b < 6; b++) {
               uploadUrls.push('http://' + baseUrl + ':' + ports[i] + '/upload');

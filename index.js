@@ -95,7 +95,7 @@ app.listen(5023);
 app.listen(5024);
 app.listen(5025);
 //max download buffer size based off of download probing data
-global.maxDownloadBuffer = 532421875;
+global.maxDownloadBuffer = 752421875;
 global.maxUploadBuffer = 10000000;
 global.dataBuffer = new Buffer(50048394);
 for (var j = 0; j < dataBuffer.length; j++) {

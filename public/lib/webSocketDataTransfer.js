@@ -94,7 +94,7 @@
    * Initiate the request
    */
   webSocketDataTransfer.prototype.start = function () {
-    this.beginTime = Date.now();
+    this.beginTime = performance.now();
     this.interval = setInterval(function () {
       self._monitor();
     }, this.monitorInterval);
@@ -144,7 +144,7 @@
       return;
     }
     else{
-      var percentComplete = Math.round(((Date.now() - this.beginTime)/this.testLength)*100);
+      var percentComplete = Math.round(((performance.now() - this.beginTime)/this.testLength)*100);
       if(percentComplete<100){
         this.clientCallbackOnTestProgress(percentComplete);
       }
@@ -152,18 +152,19 @@
       var event = {};
       event.type = result.type;
       this.totalBytes += result.chunckLoaded;
-      var bandwidthMbs = (this.totalBytes)/((Date.now() - this.beginTime)/1000);
+      var bandwidthMbs = (this.totalBytes)/((performance.now() - this.beginTime)/1000);
       if(event.type==='download'){
         //first check
-        if((parseInt(Date.now() - this.beginTime)> 1000)&&(parseInt(Date.now() - this.beginTime)<1500)){
+        if((parseInt(performance.now() - this.beginTime)> 1000)&&(parseInt(performance.now() - this.beginTime)<1500)){
           if(!this.firstCheck){
             this.firstCheck = true;
-            if(parseFloat(bandwidthMbs).toFixed(2)>50){
+            console.log(this.messages);
+            if(this.messages<100){
               console.log('increase transfer size to 1');
               this.transferSize = 1;
             }else{
               console.log('increase transfer size to 5');
-              this.transferSize = 5;
+              this.transferSize = 4;
               numberOfRequests = 2;
               //for (var g = 0; g < 10; g++) {
               //    this.createSocket(this._testIndex, this.type);
@@ -173,7 +174,7 @@
           }
         }
       }else{
-        if((parseInt((Date.now() - this.beginTime))> 1000)&&(parseFloat(bandwidthMbs).toFixed(2)>50)){
+        if((parseInt((performance.now() - this.beginTime))> 1000)&&(parseFloat(bandwidthMbs).toFixed(2)>50)){
           if(this.webSockets.length <24){
           for (var i = 1; i < 20; i++) {
             this.createSocket(this._testIndex, this.type);
@@ -223,7 +224,7 @@
   */
   webSocketDataTransfer.prototype._monitor = function () {
     var self = this;
-    var percentComplete = Math.round(((Date.now() - this.beginTime)/this.testLength)*100);
+    var percentComplete = Math.round(((performance.now() - this.beginTime)/this.testLength)*100);
     if(percentComplete<100){
       this.clientCallbackOnTestProgress(percentComplete);
     }
@@ -236,7 +237,7 @@
       }
     }
 */
-    if ((Date.now() - this.beginTime) > (this.testLength)) {
+    if ((performance.now() - this.beginTime) > (this.testLength)) {
       this._running=false;
       clearInterval(this.interval);
       self.close();
