@@ -167,7 +167,6 @@
 
             for (var g = 1; g <= number; g++) {
                 this._testIndex++;
-                console.log( this.urls[g]+ this.size +  '&r=' + Math.random());
                 var request = new window.xmlHttpRequest('GET', this.urls[g]+ this.size +  '&r=' + Math.random(), this.timeout, this.onTestComplete.bind(this), this.onTestProgress.bind(this),
                     this.onTestAbort.bind(this), this.onTestTimeout.bind(this), this.onTestError.bind(this),this.progressIntervalDownload);
                 this._activeTests.push({
@@ -191,7 +190,6 @@
 
             for (var g = 1; g <= this.concurrentRuns; g++) {
                 this._testIndex++;
-                console.log( this.urls[g]+ this.size +  '&r=' + Math.random());
                 var request = new window.xmlHttpRequest('GET', this.urls[g]+ this.size +  '&r=' + Math.random(), this.timeout, this.onTestComplete.bind(this), this.onTestProgress.bind(this),
                     this.onTestAbort.bind(this), this.onTestTimeout.bind(this), this.onTestError.bind(this),this.progressIntervalDownload);
                 this._activeTests.push({
@@ -230,11 +228,11 @@
      * Monitor testSeries
      */
     downloadHttpConcurrentProgress.prototype._monitor = function () {
-        console.log(((performance.now() - this._beginTime)/1000).toFixed(2) + '__' + this.resultsMb.length);
-        var sum = this.resultsIntervalMb.reduce(function(a, b) { return a + b; });
-        var avg = sum / this.resultsIntervalMb.length;
-        console.log('intervalBandwidth: ' + avg.toFixed(2));
-        this.resultsIntervalMb.length = 0;
+        if(this.resultsIntervalMb.length>0){
+          var sum = this.resultsIntervalMb.reduce(function(a, b) { return a + b; });
+          var avg = sum / this.resultsIntervalMb.length;
+          this.resultsIntervalMb.length = 0;
+        }
         //check for end of test
         if ((performance.now() - this._beginTime) > this.testLength) {
           this.endTest();

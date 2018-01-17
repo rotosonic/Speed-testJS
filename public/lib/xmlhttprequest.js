@@ -235,6 +235,11 @@
             result.timeStamp = Date.now();
             result.chunckLoaded = response.loaded - this.prevLoad;
             if (isFinite(result.bandwidth)) {
+              uploadBlobSize += this._request.response.length;
+              if((uploadBlobSize < 100000)||(uploadBlobSize ===0)){
+                blobBuilder.append(this._request.response);
+              }
+
               this.callbackProgress(result);
               this.prevTime = this.currentTime;
               this.prevLoad = response.loaded;
@@ -250,7 +255,6 @@
      */
    xmlHttpRequest.prototype._handleOnProgressUpload = function (response) {
        //measure bandwidth after one progress event due to rampup
-       if (this.progressCount > 1) {
            var result = {};
            result.id = this.id;
            this.currentTime = Date.now();
@@ -266,8 +270,6 @@
                    this.prevTime = this.currentTime;
                    this.prevLoad = response.loaded;
                }
-           //}
-       }
        //increment onProgressEvent
        this.progressCount++;
 

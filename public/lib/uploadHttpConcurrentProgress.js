@@ -117,9 +117,8 @@
         var bandwidthMbs = ((this.totalChunckBytes*8)/ 1000000)/((performance.now() - this._beginTime)/1000);
         this.resultsMb.push(bandwidthMbs);
         this.resultsIntervalMb.push(bandwidthMbs);
-        if(this.resultsMb.length >10){
-          this.clientCallbackProgress(bandwidthMbs);
-        }
+        this.clientCallbackProgress(bandwidthMbs);
+
     };
     /**
      * onTimeout method
@@ -146,16 +145,15 @@
         var bandwidthMbs = ((this.totalChunckBytes*8)/ 1000000)/((performance.now() - this._beginTime)/1000);
         this.resultsMb.push(bandwidthMbs);
         this.resultsIntervalMb.push(bandwidthMbs);
-        if(this.resultsMb.length >10){
-          this.clientCallbackProgress(bandwidthMbs);
-        }
+        this.clientCallbackProgress(bandwidthMbs);
+
         //first check
         if((parseInt(performance.now() - this._beginTime)> 1000)&&(parseInt(performance.now() - this._beginTime)<1500)){
           if(!this.firstCheck){
             this.firstCheck = true;
             if(this.resultsMb.length>4){
               //TODO logic to increase size or connections
-              this.size = 200000;
+              //this.size = 200000;
   /*            newRequests(24);
 
               var uploadSize = ((this.testLength - result.time) * result.loaded / result.time);
@@ -185,9 +183,7 @@
         var bandwidthMbs = ((this.totalChunckBytes*8)/ 1000000)/((performance.now() - this._beginTime)/1000);
         this.resultsMb.push(bandwidthMbs);
         this.resultsIntervalMb.push(bandwidthMbs);
-        if(this.resultsMb.length >10){
-          this.clientCallbackProgress(bandwidthMbs);
-        }
+        this.clientCallbackProgress(bandwidthMbs);
     };
 
     /**
@@ -303,15 +299,15 @@
      */
     uploadHttpConcurrentProgress.prototype._monitor = function () {
         //TODO check after 4 seconds to see if we have any results. If not the check if upload data was created. decide to create a smaller upload or report error
-        console.log(((performance.now() - this._beginTime)/1000).toFixed(2) + '__' + this.resultsMb.length);
-        var sum = this.resultsIntervalMb.reduce(function(a, b) { return a + b; });
-        var avg = sum / this.resultsIntervalMb.length;
-        console.log('intervalBandwidth: ' + avg.toFixed(2));
-        this.resultsIntervalMb.length = 0;
+        if(this.resultsIntervalMb.length>0){
+          var sum = this.resultsIntervalMb.reduce(function(a, b) { return a + b; });
+          var avg = sum / this.resultsIntervalMb.length;
+          console.log('intervalBandwidth: ' + avg.toFixed(2));
+          this.resultsIntervalMb.length = 0;
+        }
       //check for end of test
         if ((performance.now() - this._beginTime) > this.testLength) {
           clearInterval(this.interval);
-          console.log('endTest call');
           this.endTest();
         }
     };
@@ -331,6 +327,10 @@
         this.resultsMb.length = 0;
         this.resultsIntervalMb.length = 0;
         this.firstCheck = false;
+        var bb = blobBuilder.getBlob();
+        console.log(bb.size);
+        this.size = bb.size;
+        this._payload = bb;
         this.interval = setInterval(function () {
             self._monitor();
         }, this.monitorInterval);
@@ -345,7 +345,7 @@
      * @returns {*}
      */
     function getRandomData(size) {
-
+debugger;
         function getData() {
             return Math.random().toString();
         }

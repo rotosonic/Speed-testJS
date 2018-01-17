@@ -11,7 +11,7 @@
  *  Unless required by applicable law or agreed to in writing, software
  *  distributed under the License is distributed on an "AS IS" BASIS,
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
+ *  See the License for the specifigitc language governing permissions and
  *  limitations under the License.
  * /
  */
@@ -37,7 +37,7 @@
   var downloadSize = 50048394;
   var testServerTimeout = 2000;
   var latencyTimeout = 3000;
-  var downloadCurrentRuns = 4;
+  var downloadCurrentRuns = 12;
   var downloadTestTimeout = 12000;
   var downloadTestLength = 12000;
   var downloadMovingAverage = 18;
@@ -46,7 +46,7 @@
   var ports = [5020, 5021, 5022, 5023, 5024, 5025];
   var downloadMonitorInterval = 500;
   var uploadSize = 10000;
-  var uploadCurrentRuns = 4;
+  var uploadCurrentRuns = 6;
   var uploadTestTimeout = 12000;
   var uploadTestLength = 12000;
   var uploadMovingAverage = 18;
@@ -475,7 +475,7 @@ latencyTest(testPlan.hasIPv6 ? 'IPv6' : 'IPv4');
 
     downloadUrls.length=0;
     var baseUrl = (version === 'IPv6') ? testPlan.baseUrlIPv6NoPort : testPlan.baseUrlIPv4NoPort;
-baseUrl = '69.241.66.214';
+baseUrl ='69.241.66.214';
     for (var i = 0; i < ports.length; i++) {
       for(var b= 0; b <6; b++ )
       {
@@ -687,8 +687,8 @@ document.getElementById("uploadRate").value = finalValue;
       }
 
       var baseUrl = (version === 'IPv6') ? testPlan.baseUrlIPv6NoPort : testPlan.baseUrlIPv4NoPort;
+      baseUrl ='69.241.66.214';
       uploadUrls.length = 0;
-      baseUrl = '69.241.66.214';
       for (var i = 0; i < ports.length; i++) {
           for (var b = 0; b < 6; b++) {
               uploadUrls.push('http://' + baseUrl + ':' + ports[i] + '/upload');
