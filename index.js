@@ -95,12 +95,13 @@ app.listen(5023);
 app.listen(5024);
 app.listen(5025);
 //max download buffer size based off of download probing data
-global.maxDownloadBuffer = 752421875;
+global.maxDownloadBuffer = 100242187;
 global.maxUploadBuffer = 10000000;
-global.dataBuffer = new Buffer(50048394);
-for (var j = 0; j < dataBuffer.length; j++) {
-  dataBuffer[j] = 32 + Math.random() * 95;
-}
+global.dataBuffer = new Buffer(150048394);
+global.dataBuffer.fill(0x1020304);
+//for (var j = 0; j < dataBuffer.length; j++) {
+//  dataBuffer[j] = 32 + Math.random() * 95;
+//}
 var dataBuffer0 = new Buffer(10000);
 for (var j = 0; j < dataBuffer0.length; j++) {
   dataBuffer0[j] = 32 + Math.random() * 95;

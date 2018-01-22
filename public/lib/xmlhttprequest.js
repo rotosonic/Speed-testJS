@@ -236,7 +236,7 @@
             result.chunckLoaded = response.loaded - this.prevLoad;
             if (isFinite(result.bandwidth)) {
               uploadBlobSize += this._request.response.length;
-              if((uploadBlobSize < 100000)||(uploadBlobSize ===0)){
+              if((uploadBlobSize < 50000)||(uploadBlobSize ===0)){
                 blobBuilder.append(this._request.response);
               }
 
