@@ -44,7 +44,7 @@
   var downloadUrls = [];
   var ports = [5020, 5021, 5022, 5023, 5024, 5025];
   var downloadMonitorInterval = 100;
-  var uploadSize = 10000;
+  var uploadSize = 50000;
   var uploadCurrentRuns = 1;
   var uploadTestTimeout = 12000;
   var uploadTestLength = 12000;
@@ -166,6 +166,7 @@
       if (xhr.readyState == XMLHttpRequest.DONE) {
         var data = JSON.parse(xhr.responseText);
         testPlan = data;
+        testPlan.hasIPv6 = false;
         if (testPlan.performLatencyRouting) {
           latencyBasedRouting();
         }
@@ -334,7 +335,7 @@
       }
     }
 
-    var baseUrl = (version === 'IPv6') ? 'http://' + testPlan.baseUrlIPv6 + '/latency' : 'http://' + testPlan.baseUrlIPv4 + '/latency';
+    var baseUrl = (version === 'IPv6') ? 'http://' + testPlan.baseUrlIPv6 + '/latency' : 'http://127.0.0.1/latency';
 
     var latencyHttpTestSuite = new window.latencyHttpTest(baseUrl, 10, 3000, latencyHttpOnComplete, latencyHttpOnProgress,
       latencyHttpOnAbort, latencyHttpOnTimeout, latencyHttpOnError);

@@ -54,7 +54,7 @@
         this.clientCallbackProgress = callbackProgress;
         this.clientCallbackError = callbackError;
         //start time of test suite
-        this._beginTime = Date.now();
+        this._beginTime = performance.now();
         //boolean on whether test  suite is running or not
         this._running = true;
         //array holding  results
@@ -78,6 +78,12 @@
         this.highBandwidthUploadSize = 5000000;
         //upload threshold value
         this.uploadThresholdValue = 50;
+        //results object array
+        this.resultsMb = [];
+        //total chunk totalBytes
+        this.totalChunckBytes = 0;
+        //set transferSizeMbs
+        this.setTransferSize = false;
     }
 
     /**
@@ -86,7 +92,7 @@
      */
     uploadHttpConcurrentProgress.prototype.onTestError = function (result) {
         if (this._running) {
-          if ((Date.now() - this._beginTime) > this.testLength) {
+          if ((performance.now() - this._beginTime) > this.testLength) {
             this.endTest();
           }
           else{
@@ -103,6 +109,9 @@
      */
     uploadHttpConcurrentProgress.prototype.onTestAbort = function (result) {
         this._storeResults(result);
+        this.totalChunckBytes = this.totalChunckBytes + result.chunckLoaded;
+        var bandwidthMbs = ((this.totalChunckBytes * 8) / 1000000) / ((performance.now() - this._beginTime) / 1000);
+        this.resultsMb.push(bandwidthMbs);
         this.totalBytes = this.totalBytes + result.loaded;
     };
     /**
@@ -111,7 +120,7 @@
      */
     uploadHttpConcurrentProgress.prototype.onTestTimeout = function () {
         if (this._running) {
-            if ((Date.now() - this._beginTime) > this.testLength) {
+            if ((performance.now() - this._beginTime) > this.testLength) {
               this.endTest();
             }
 
@@ -128,38 +137,45 @@
 
         //store results
         this._storeResults(result);
-
+        this.totalChunckBytes = this.totalChunckBytes + result.chunckLoaded;
+        var bandwidthMbs = ((this.totalChunckBytes * 8) / 1000000) / ((performance.now() - this._beginTime) / 1000);
+        this.resultsMb.push(bandwidthMbs);
+        this._calculateResults();
+        if(!this.setTransferSize){
+          this.setTransferSize = true;
         if (this.isMicrosoftBrowser) {
 
             if (!this.isMaxUploadSize) {
                 if (this.uploadResults[this.uploadResults.length - 1] > this.uploadThresholdValue) {
                     //TODO need to dynamically increase the size.. may be look at the requests completed or the uploadSpeed
+                    //console.log('increase to max size');
                     this.isMaxUploadSize = true;
                     //upload size used for high bandwidth clients of microsoft browsers
-                    this.size = this.highBandwidthUploadSize;
+                    this.size = this.highBandwidthUploadSize/32;
                 } else {
                     //upload size used for low bandwidth clients of microsoft browsers
+                    //console.log('increase to low size');
                     this.size = this.lowBandwidthUploadSize;
                 }
             }
 
         } else {
             var uploadSize = (this.testLength - result.time) * result.loaded / result.time;
-
+            //console.log('custom size: ' + uploadSize);
             if (uploadSize > this.size) {
-                this.size = uploadSize;
+                this.size = uploadSize/32;
                 if (this.size > this.maxuploadSize) {
-                    this.size = this.maxuploadSize;
+                    this.size = this.maxuploadSize/32;
                 }
             }
         }
-
+      }
         if (this.newRun) {
             this.concurrentRuns = 1;
             this.start();
         }
         else {
-            this.concurrentRuns = 4;
+            this.concurrentRuns = 16;
             this.start();
             //from the third group run. when a connection ends start a new one.
             this.newRun = true;
@@ -176,6 +192,10 @@
             return;
         }
         this.totalBytes = this.totalBytes + result.loaded;
+        this.totalChunckBytes = this.totalChunckBytes + result.chunckLoaded;
+        var bandwidthMbs = ((this.totalChunckBytes * 8) / 1000000) / ((performance.now() - this._beginTime) / 1000);
+        this.resultsMb.push(bandwidthMbs);
+        console.log(bandwidthMbs);
         this._storeResults(result);
     };
 
@@ -234,6 +254,10 @@
     };
 
     uploadHttpConcurrentProgress.prototype._calculateResults = function () {
+      var bandwidthMbs = ((this.totalChunckBytes * 8) / 1000000) / ((performance.now() - this._beginTime) / 1000);
+      this.clientCallbackProgress(bandwidthMbs);
+
+/*
         var intervalBandwidth = 0;
         var totalLoaded = 0;
         var totalTime = 0;
@@ -275,6 +299,7 @@
             }
 
         }
+        */
     };
 
     /**
@@ -283,6 +308,18 @@
     uploadHttpConcurrentProgress.prototype.endTest = function () {
       this._running = false;
       this.abortAll();
+      clearInterval(this.interval);
+      if (this.resultsMb && this.resultsMb.length) {
+           var uploadResults = this.resultsMb;
+           var dataLength = uploadResults.length;
+           var data = slicing(uploadResults, Math.round(dataLength * 0.4), dataLength);
+           data = data.sort(numericComparator);
+           var result = meanCalculator(data);
+           this.clientCallbackComplete(result);
+       } else {
+           this.clientCallbackError('no measurements obtained');
+       }
+      /*
       clearInterval(this.interval);
       if (this.uploadResults && this.uploadResults.length) {
           var uploadResults = this.uploadResults;
@@ -294,14 +331,16 @@
       } else {
           this.clientCallbackError('no measurements obtained');
       }
+      */
     };
     /**
      * Monitor testSeries
      */
     uploadHttpConcurrentProgress.prototype._monitor = function () {
         this._calculateResults();
+
         //check for end of test
-        if ((Date.now() - this._beginTime) > this.testLength) {
+        if ((performance.now() - this._beginTime) > this.testLength) {
           this.endTest();
         }
     };
@@ -317,9 +356,11 @@
         this.interval = null;
         this.totalBytes = 0;
         this._payload = null;
+        this.totalChunckBytes = 0;
+        this.resultsMb.length = 0;
         this.interval = setInterval(function () {
             self._monitor();
-        }, 100);
+        }, this.monitorInterval);
         this.start();
         var self = this;
 

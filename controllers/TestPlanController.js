@@ -94,7 +94,7 @@ class TestPlanController {
             testPlan.hasIPv6 = false;
         }
         testPlan.baseUrlIPv4 = global.AddressIpv4 + ':' + global.webPort;
-        testPlan.baseUrlIPv4NoPort = global.AddressIpv4;
+        testPlan.baseUrlIPv4NoPort = '127.0.0.1';
         testPlan.port = global.webPort;
         testPlan.maxDownloadSize = global.maxDownloadBuffer;
         testPlan.maxuploadSize = global.maxUploadBuffer;
