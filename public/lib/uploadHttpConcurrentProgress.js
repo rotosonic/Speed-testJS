@@ -151,11 +151,11 @@
                     //console.log('increase to max size');
                     this.isMaxUploadSize = true;
                     //upload size used for high bandwidth clients of microsoft browsers
-                    this.size = this.highBandwidthUploadSize/32;
+                    this.size = this.highBandwidthUploadSize/4;
                 } else {
                     //upload size used for low bandwidth clients of microsoft browsers
                     //console.log('increase to low size');
-                    this.size = this.lowBandwidthUploadSize;
+                    this.size = this.lowBandwidthUploadSize/4;
                 }
             }
 
@@ -163,9 +163,9 @@
             var uploadSize = (this.testLength - result.time) * result.loaded / result.time;
             //console.log('custom size: ' + uploadSize);
             if (uploadSize > this.size) {
-                this.size = uploadSize/32;
+                this.size = uploadSize/4;
                 if (this.size > this.maxuploadSize) {
-                    this.size = this.maxuploadSize/32;
+                    this.size = this.maxuploadSize/4;
                 }
             }
         }
@@ -175,7 +175,7 @@
             this.start();
         }
         else {
-            this.concurrentRuns = 16;
+            this.concurrentRuns = 8;
             this.start();
             //from the third group run. when a connection ends start a new one.
             this.newRun = true;
