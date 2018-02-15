@@ -52,10 +52,11 @@ class DownloadController {
         res.header('Pragma', 'no-cache');
       if(!isNaN(parseInt(req.query.bufferSize))  && (parseInt(req.query.bufferSize)<=global.maxDownloadBuffer) &&(parseInt(req.query.bufferSize)>0)){
         var bufferStream = new stream.PassThrough();
-        //bufferStream.pipe(res);
-        //bufferStream.write(global.dataBuffer);
-        //bufferStream.end();
-        res.end(new Buffer(global.dataBuffer, 'binary'));
+        bufferStream.pipe(res);
+        var responseBuffer = new Buffer(parseInt(req.query.bufferSize));
+        responseBuffer.fill(0x1020304);
+        bufferStream.write(responseBuffer);
+        bufferStream.end();
       }
       else{
         res.status(404).end('bufferSize failed validation.');

@@ -48,6 +48,8 @@
     this.monitorInterval = monitorInterval;
     //unique id or test
     this._testIndex = 0;
+    //number of completed requestTimeout
+    this.completedRequests = 0;
     //array holding active tests
     this._activeTests = [];
     this.clientCallbackComplete = callbackComplete;
@@ -96,6 +98,7 @@
    * @return error object
    */
   uploadHttpConcurrentProgress.prototype.onTestError = function(result) {
+    this.completedRequests++;
 /*
     if (this._running) {
       if ((performance.now() - this._beginTime) > this.testLength) {
@@ -114,20 +117,24 @@
    * @return abort object
    */
   uploadHttpConcurrentProgress.prototype.onTestAbort = function(result) {
+/*
     this._storeResults(result);
+    this.completedRequests++;
     this.totalChunckBytes = this.totalChunckBytes + result.chunckLoaded;
     this._storeResults(result);
     var bandwidthMbs = ((this.totalChunckBytes * 8) / 1000000) / ((performance.now() - this._beginTime) / 1000);
+    console.log(bandwidthMbs);
     this.resultsMb.push(bandwidthMbs);
     this.resultsIntervalMb.push(bandwidthMbs);
     this.clientCallbackProgress(bandwidthMbs);
-
+*/
   };
   /**
    * onTimeout method
    * @return timeout object
    */
   uploadHttpConcurrentProgress.prototype.onTestTimeout = function() {
+    this.completedRequests++;
 /*
     if (this._running) {
       if ((performance.now() - this._beginTime) > this.testLength) {
@@ -145,6 +152,7 @@
     if (!this._running) {
       return;
     }
+    this.completedRequests++;
     this.totalChunckBytes = this.totalChunckBytes + result.chunckLoaded;
     this._storeResults(result);
     var bandwidthMbs = ((this.totalChunckBytes * 8) / 1000000) / ((performance.now() - this._beginTime) / 1000);
@@ -180,6 +188,7 @@
       return;
     }
 
+
     if (this._payload === null) {
       this._payload = getRandomData(this.size);
     } else {
@@ -198,7 +207,7 @@
         testRun: this._testIndex
       });
 
-      request.start(this.size, this._testIndex, this._payload);
+      request.start(this._payload.size, this._testIndex, this._payload);
     }
 
 
@@ -268,16 +277,25 @@
     this.abortAll();
     var finalArray;
     if (this.resultsMb.length > 10) {
-      finalArray = this.resultsMb.slice(Math.round(this.resultsMb.length * .75), this.resultsMb.length - 1);
+      var dataLength = this.resultsMb.length;
+          var data = slicing(this.resultsMb, Math.round(dataLength * 0.4), dataLength);
+          data = data.sort(numericComparator);
+          var result = meanCalculator(data);
+          this.clientCallbackComplete(result);
+      //finalArray = this.resultsMb.slice(Math.round(this.resultsMb.length * .75), this.resultsMb.length - 1);
+      //console.log(this.resultsMb);
+      //console.log(finalArray);
     } else {
       this.clientCallbackError('no measurements obtained');
       return;
     }
+    /*
     var sum = finalArray.reduce(function(a, b) {
       return a + b;
     });
     var avg = sum / finalArray.length;
     this.clientCallbackComplete(avg);
+    */
     clearInterval(this.interval);
 
   };
@@ -293,16 +311,17 @@
       var avg = sum / this.resultsIntervalMb.length;
       this.resultsIntervalMb.length = 0;
     }
+    console.log(this.intervalCounter + '  ' + this.completedRequests + '  ' + this._testIndex + ' '  +this.intervalCounter*4);
     //first check to increase sizes
-    if (this.intervalCounter === 2) {
-      if (this.resultsMb.length > 100) {
-        this.newRequests(2);
-        this.shouldIncreaseSize();
-      }else{
-        console.log('low bandwidth');
-        this.newRequests(8);
+    if (this.intervalCounter % 2 === 0) {
+      if(this.completedRequests>(this.intervalCounter*4)*2){
+        this.size = this.size*1.5;
+        if(this.size>10000000){
+          this.size = 10000000;
         }
+      }
     }
+
     //check for end of test
     if ((performance.now() - this._beginTime) > this.testLength) {
       clearInterval(this.interval);
@@ -324,10 +343,10 @@
             //TODO need to dynamically increase the size.. may be look at the requests completed or the uploadSpeed
             this.isMaxUploadSize = true;
             //upload size used for high bandwidth clients of microsoft browsers
-            this.size = this.highBandwidthUploadSize;
+            this.size = this.highBandwidthUploadSize/10;
           } else {
             //upload size used for low bandwidth clients of microsoft browsers
-            this.size = this.lowBandwidthUploadSize;
+            this.size = this.lowBandwidthUploadSize/10;
           }
         }
 
@@ -336,9 +355,9 @@
         var uploadSize = (this.testLength - (performance.now() / 1000)) * this.totalChunckBytes / parseInt(performance.now() - this._beginTime);
         uploadSize = uploadSize;
         if (uploadSize > this.size) {
-          this.size = uploadSize;
+          this.size = uploadSize/10;
           if (this.size > this.maxuploadSize) {
-            this.size = this.maxuploadSize;
+            this.size = this.maxuploadSize/10;
           }
         }
       }
@@ -360,6 +379,7 @@
     this.resultsIntervalMb.length = 0;
     this.firstCheck = false;
     this.intervalCounter = 0;
+    this.completedRequests = 0;
     this.interval = setInterval(function() {
       self._monitor();
     }, this.monitorInterval);

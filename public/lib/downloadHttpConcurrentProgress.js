@@ -55,7 +55,7 @@
         this.clientCallbackTimeout = callbackTimeout;
         this.clientCallbackError = callbackError;
         //start time of test suite
-        this._beginTime = performance.now();
+        this._beginTime = Date.now();
         //boolean on whether test  suite is running or not
         this._running = true;
         //array holding  results
@@ -70,12 +70,6 @@
         this.resultsCount = 0;
         //results to send to client
         this.downloadResults = [];
-        //results object array
-        this.resultsMb =[];
-        // fistCheck
-        this.firstCheck = false;
-        //results interval bandwidth
-        this.resultsIntervalMb =[];
     }
 
     /**
@@ -84,7 +78,7 @@
      */
     downloadHttpConcurrentProgress.prototype.onTestError = function (result) {
       if (this._running) {
-         if ((performance.now() - this._beginTime) > this.testLength) {
+         if ((Date.now() - this._beginTime) > this.testLength) {
            this.endTest();
           }
           else{
@@ -100,11 +94,8 @@
      * @return abort object
      */
     downloadHttpConcurrentProgress.prototype.onTestAbort = function (result) {
-      this.totalBytes = this.totalBytes + result.chunckLoaded;
-      var bandwidthMbs = ((this.totalBytes*8)/ 1000000)/((performance.now() - this._beginTime)/1000);
-      this.resultsMb.push(bandwidthMbs);
-      this.resultsIntervalMb.push(bandwidthMbs);
-      this.clientCallbackProgress(bandwidthMbs);
+      this._storeResults(result);
+      this.totalBytes = this.totalBytes + result.loaded;
     };
     /**
      * onTimeout method
@@ -112,7 +103,7 @@
      */
     downloadHttpConcurrentProgress.prototype.onTestTimeout = function () {
         if(this._running) {
-            if ((performance.now() - this._beginTime) > this.testLength) {
+            if ((Date.now() - this._beginTime) > this.testLength) {
                 this.endTest();
             }
 
@@ -128,12 +119,9 @@
             return;
         }
 
-        this.totalBytes = this.totalBytes + result.chunckLoaded;
-        var bandwidthMbs = ((this.totalBytes*8)/ 1000000)/((performance.now() - this._beginTime)/1000);
-        this.resultsMb.push(bandwidthMbs);
-        this.resultsIntervalMb.push(bandwidthMbs);
-        this.clientCallbackProgress(bandwidthMbs);
-        this.newRequests(1);
+        //store results
+        this._storeResults(result);
+        this.start();
         };
 
 
@@ -146,39 +134,13 @@
             return;
         }
         //check for end of test
-        if ((performance.now() - this._beginTime) > this.testLength) {
+        if ((Date.now() - this._beginTime) > this.testLength) {
             this.endTest();
         }
-        this.totalBytes = this.totalBytes + result.chunckLoaded;
-        var bandwidthMbs = ((this.totalBytes*8)/ 1000000)/((performance.now() - this._beginTime)/1000);
-        this.resultsMb.push(bandwidthMbs);
-        this.resultsIntervalMb.push(bandwidthMbs);
-          this.clientCallbackProgress(bandwidthMbs);
-    };
-
-    /**
-     * Start the test
-     */
-    downloadHttpConcurrentProgress.prototype.newRequests = function (number) {
-//TODO this.totalBytes is undefined if this method or start called
-      if (!this._running) {
-            return;
-      }
-
-            for (var g = 1; g <= number; g++) {
-                this._testIndex++;
-                var request = new window.xmlHttpRequest('GET', this.urls[g]+ this.size +  '&r=' + Math.random(), this.timeout, this.onTestComplete.bind(this), this.onTestProgress.bind(this),
-                    this.onTestAbort.bind(this), this.onTestTimeout.bind(this), this.onTestError.bind(this),this.progressIntervalDownload);
-                this._activeTests.push({
-                    xhr: request,
-                    testRun: this._testIndex
-                });
-                request.start(0, this._testIndex);
-
-            }
+        this.totalBytes = this.totalBytes + result.loaded;
+        this._storeResults(result);
 
     };
-
 
     /**
      * Start the test
@@ -209,7 +171,6 @@
         for (var i = 0; i < this._activeTests.length; i++) {
             if (typeof(this._activeTests[i]) !== 'undefined') {
                 this._activeTests[i].xhr._request.abort();
-                this._activeTests[i].xhr._request = null;
             }
         }
     };
@@ -228,13 +189,46 @@
      * Monitor testSeries
      */
     downloadHttpConcurrentProgress.prototype._monitor = function () {
-        if(this.resultsIntervalMb.length>0){
-          var sum = this.resultsIntervalMb.reduce(function(a, b) { return a + b; });
-          var avg = sum / this.resultsIntervalMb.length;
-          this.resultsIntervalMb.length = 0;
+        var intervalBandwidth = 0;
+        var totalLoaded = 0;
+        var totalTime = 0;
+        var intervalCounter = 0;
+        this.resultsCount++;
+
+        if (this.results.length > 0) {
+            for (var i = 0; i < this.results.length; i++) {
+                if (this.results[i].timeStamp > (Date.now() - this.monitorInterval)) {
+                    intervalBandwidth = intervalBandwidth + parseFloat(this.results[i].bandwidth);
+                    totalLoaded = totalLoaded + this.results[i].chunckLoaded;
+                    totalTime = totalTime + this.results[i].totalTime;
+                    intervalCounter++;
+                }
+            }
+            if (!isNaN(intervalBandwidth / intervalCounter)) {
+                var transferSizeMbs = (totalLoaded * 8) / 1000000;
+                var transferDurationSeconds = this.monitorInterval / 1000;
+                this.finalResults.push(transferSizeMbs / transferDurationSeconds);
+                var lastElem = Math.min(this.finalResults.length, this.movingAverage);
+                if (lastElem > 0) {
+                    var singleMovingAverage = 0;
+                    for (var j = 1; j <= lastElem; j++) {
+                        if (isFinite(this.finalResults[this.finalResults.length - j])) {
+                            singleMovingAverage = singleMovingAverage + this.finalResults[this.finalResults.length - j];
+
+                        }
+                    }
+                    singleMovingAverage = singleMovingAverage / lastElem;
+                    if (singleMovingAverage > 0) {
+                        this.downloadResults.push(singleMovingAverage);
+                        this.clientCallbackProgress(singleMovingAverage);
+                    }
+                }
+
+            }
+
         }
         //check for end of test
-        if ((performance.now() - this._beginTime) > this.testLength) {
+        if ((Date.now() - this._beginTime) > this.testLength) {
           this.endTest();
         }
 
@@ -244,18 +238,13 @@
      */
      downloadHttpConcurrentProgress.prototype.endTest = function(){
        this._running = false;
-       this.abortAll();
-       var finalArray;
-       if(this.resultsMb.length>10){
-         finalArray = this.resultsMb.slice(Math.round(this.resultsMb.length * .75),this.resultsMb.length-1);
-       }else{
-         this.clientCallbackError('no measurements obtained');
-         return;
-       }
-       var sum = finalArray.reduce(function(a, b) { return a + b; });
-       var avg = sum / finalArray.length;
-       this.clientCallbackComplete(avg);
        clearInterval(this.interval);
+       if (this.downloadResults && this.downloadResults.length) {
+           this.clientCallbackComplete(this.downloadResults);
+       } else {
+           this.clientCallbackError('no measurements obtained');
+       }
+       this.abortAll();
      };
 
     /**
@@ -268,14 +257,11 @@
         this.interval = null;
         this.downloadResults.length = 0;
         this.totalBytes = 0;
-        this.totalChunckBytes = 0;
-        this.resultsMb.length = 0;
-        this.resultsIntervalMb.length = 0;
+        this.start();
+        var self = this;
         this.interval = setInterval(function () {
           self._monitor();
         }, this.monitorInterval);
-        this.start();
-        var self = this;
     };
 
     window.downloadHttpConcurrentProgress = downloadHttpConcurrentProgress;

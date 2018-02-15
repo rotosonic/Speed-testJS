@@ -85,6 +85,7 @@
       this._request.open(this.method, this.url, true);
       this.requestTimeout= setTimeout(this._internalAbort.bind(this), this.timeout);
       if(this.method==='POST') {
+        this.transferSize = payload.size;
         this._request.send(payload);
       }
       else{
@@ -235,11 +236,33 @@
             result.timeStamp = Date.now();
             result.chunckLoaded = response.loaded - this.prevLoad;
             if (isFinite(result.bandwidth)) {
-              uploadBlobSize += this._request.response.length;
-              if((uploadBlobSize < 50000)||(uploadBlobSize ===0)){
-                blobBuilder.append(this._request.response);
+              uploadSizes += this._request.response.length;
+              if(uploadSizes < 5000000 ){
+              if((uploadSize1 < 50000)||(uploadSize1 ===0)){
+                blobBuilder1.append(this._request.response);
+                uploadSize1 += this._request.response.length;
               }
-
+              if((uploadSize2 < 100000)||(uploadSize2 ===0)){
+                blobBuilder2.append(this._request.response);
+                uploadSize2 += this._request.response.length;
+              }
+              if((uploadSize3 < 150000)||(uploadSize3 ===0)){
+                blobBuilder4.append(this._request.response);
+                uploadSize3 += this._request.response.length;
+              }
+              if((uploadSize4 < 200000)||(uploadSize4 ===0)){
+                blobBuilder4.append(this._request.response);
+                uploadSize4 += this._request.response.length;
+              }
+              if((uploadSize5 < 2000000)||(uploadSize5 ===0)){
+                blobBuilder5.append(this._request.response);
+                uploadSize5 += this._request.response.length;
+              }
+              if((uploadSize6 < 5000000)||(uploadSize6 ===0)){
+                blobBuilder6.append(this._request.response);
+                uploadSize6 += this._request.response.length;
+              }
+            }
               this.callbackProgress(result);
               this.prevTime = this.currentTime;
               this.prevLoad = response.loaded;
